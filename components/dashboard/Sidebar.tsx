@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { usePathname} from "next/navigation";
 import Image from "next/image";
-import axios from "axios";
+
 import {
   LayoutDashboard,
   ChevronDown,
@@ -18,7 +18,9 @@ import {
   HelpCircle,
   LogOut,
 } from "lucide-react";
-import { getProfile, type Profile } from "@/services/profile";
+
+import { useAuth } from "@/contexts/AuthContext";
+
 
 interface SidebarProps {
   closeSidebar?: () => void;
@@ -27,7 +29,6 @@ interface SidebarProps {
 export default function Sidebar({
   closeSidebar,
 }: SidebarProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const [contentOpen, setContentOpen] = useState(
     pathname.startsWith("/manage-content") ||
@@ -39,45 +40,10 @@ export default function Sidebar({
   };
 
 
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<Profile | null>(null);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const token =
-        localStorage.getItem("access_token") ||
-        localStorage.getItem("teacher_access_token") ||
-        localStorage.getItem("token");
-
-      if (!token) {
-        setProfile(null);
-        setLoading(false);
-        router.replace("/auth/login");
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const data = await getProfile();
-        setProfile(data);
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-        if (
-          axios.isAxiosError(error) &&
-          (error.response?.status === 401 || error.response?.status === 403)
-        ) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("teacher_access_token");
-          localStorage.removeItem("token");
-          router.replace("/auth/login");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchProfile();
-  }, [router]);
+  const { profile, loading, logout } =
+  useAuth();
+  const avatarSrc = profile?.profile_picture || "/default_pp.jpg";
+  const isRemoteAvatar = avatarSrc.startsWith("http://") || avatarSrc.startsWith("https://");
   
   return (
     <aside className="w-[280px] bg-white border-r border-slate-200 min-h-screen flex flex-col">
@@ -92,11 +58,12 @@ export default function Sidebar({
       <div className="px-4">
         <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
           <Image
-            src={profile?.profile_picture || "/default_pp.jpg"}
+            src={avatarSrc}
             alt={profile?.full_name || "profile"}
             width={40}
             height={40}
-            className="w-12 h-12 rounded-full"
+            unoptimized={isRemoteAvatar}
+            className="w-12 h-12 rounded-full object-cover"
           />
 
           <div>
@@ -149,9 +116,9 @@ export default function Sidebar({
           {contentOpen && (
             <div className="ml-6 mt-3 space-y-1">
               <Link
-                href="/dashboard/categories"
+                href="/manage-content/categories"
                 onClick={closeSidebar}
-                className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/dashboard/categories")
+                className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/manage-content/categories")
                     ? "bg-blue-50 text-blue-600"
                     : "text-slate-600 hover:bg-slate-50"
                   }`}
@@ -161,9 +128,9 @@ export default function Sidebar({
               </Link>
 
               <Link
-                href="/dashboard/subcategories"
+                href="/manage-content/subcategories"
                 onClick={closeSidebar}
-                className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/dashboard/subcategories")
+                className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/manage-content/subcategories")
                     ? "bg-blue-50 text-blue-600"
                     : "text-slate-600 hover:bg-slate-50"
                   }`}

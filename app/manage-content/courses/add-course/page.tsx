@@ -1,103 +1,136 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import type { Category } from "@/services/category";
+import { getCategories } from "@/services/category";
+import { createCourse } from "@/services/courses";
+
+type CourseFormData = {
+  category: string;
+  subcategory: string;
+  name: string;
+  price: string;
+  description: string;
+  is_published: string;
+};
 
 export default function AddCoursePage() {
-  const [formData, setFormData] = useState({
+  const router = useRouter();
+
+  const [formData, setFormData] = useState<CourseFormData>({
     category: "",
     subcategory: "",
-    title: "",
+    name: "",
+    price: "",
     description: "",
+    is_published: "false",
   });
 
-  const categories = [
-    {
-      id: 1,
-      name: "Web Development",
-    },
-    {
-      id: 2,
-      name: "UI/UX Design",
-    },
-    {
-      id: 3,
-      name: "Data Science",
-    },
-  ];
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [coverImage, setCoverImage] = useState<File | null>(null);
 
-  const subcategories = {
-    "Web Development": [
-      "Frontend Development",
-      "Backend Development",
-      "Full Stack Development",
-    ],
-    "UI/UX Design": [
-      "UI Design",
-      "UX Research",
-      "Figma",
-    ],
-    "Data Science": [
-      "Machine Learning",
-      "Python",
-      "Data Analysis",
-    ],
-  };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const data = await getCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error("Failed to load categories", error);
+        toast.error("Failed to load categories");
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    void fetchCategories();
+  }, []);
+
+  const selectedCategory = categories.find(
+    (category) => String(category.id) === formData.category
+  );
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+
+    setFormData((prev) => {
+      const nextState = {
+        ...prev,
+        [name]: value,
+      };
+
+      if (name === "category") {
+        nextState.subcategory = "";
+      }
+
+      return nextState;
     });
   };
 
-  const router = useRouter();
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    console.log(formData);
-    router.push("/manage-content/courses");
+    try {
+      setSubmitting(true);
 
-    // await api.post("/courses/", {
-    //     category: formData.category,
-    //     subcategory: formData.subcategory,
-    //     title: formData.title,
-    //     });
+      const payload = new FormData();
+      payload.append("category", formData.category);
+      payload.append("subcategory", formData.subcategory);
+      payload.append("name", formData.name);
+      payload.append("price", formData.price);
+      payload.append("description", formData.description);
+      payload.append("is_published", formData.is_published);
 
-    toast.success(
-        "Course Created Successfully!",
-        {
-            duration: 3000,
-        }
-    );
+      if (coverImage) {
+        payload.append("cover_image", coverImage);
+      }
+
+      const response = await createCourse(payload);
+
+      toast.success(response.message || "Course created successfully", {
+        duration: 3000,
+      });
+
+      setTimeout(() => {
+        router.push("/manage-content/courses");
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create course");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  if (loadingCategories) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <p className="text-slate-500">Loading categories...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Add New Course
-        </h1>
+        <h1 className="text-2xl font-bold text-slate-800">Add New Course</h1>
 
         <p className="mt-2 text-sm text-slate-500">
-          Create a new course and assign it
-          to a category.
+          Create a new course and assign it to a category.
         </p>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 rounded-3xl bg-white p-4 shadow-sm"
+        className="space-y-5 rounded-3xl bg-white p-6 shadow-sm"
       >
-        {/* Category */}
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -108,24 +141,18 @@ export default function AddCoursePage() {
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             >
-              <option value="">
-                Select Category
-              </option>
-
+              <option value="">Select Category</option>
               {categories.map((category) => (
-                <option
-                  key={category.id}
-                  value={category.name}
-                >
+                <option key={category.id} value={category.id}>
                   {category.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Subcategory */}
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Sub Category
@@ -135,46 +162,74 @@ export default function AddCoursePage() {
               name="subcategory"
               value={formData.subcategory}
               onChange={handleChange}
-              disabled={!formData.category}
-              className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+              disabled={!selectedCategory}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+              required
             >
-              <option value="">
-                Select Sub Category
-              </option>
+              <option value="">Select Sub Category</option>
 
-              {(
-                subcategories[
-                  formData.category as keyof typeof subcategories
-                ] || []
-              ).map((sub) => (
-                <option
-                  key={sub}
-                  value={sub}
-                >
-                  {sub}
+              {selectedCategory?.subcategories.map((subcategory) => (
+                <option key={subcategory.id} value={subcategory.id}>
+                  {subcategory.name}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Course Title */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Course Title
+            Course Name
           </label>
 
           <input
             type="text"
-            name="title"
-            value={formData.title}
+            name="name"
+            value={formData.name}
             onChange={handleChange}
-            placeholder="Enter course title"
-            className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter course name"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
         </div>
 
-        {/* Course Cover */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Price
+            </label>
+
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              placeholder="0"
+              min="0"
+              step="0.01"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Status
+            </label>
+
+            <select
+              name="is_published"
+              value={formData.is_published}
+              onChange={handleChange}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="false">Draft</option>
+              <option value="true">Published</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
             Course Cover
@@ -182,13 +237,15 @@ export default function AddCoursePage() {
 
           <input
             type="file"
-            name="cover"
-            onChange={handleChange}
-            className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0] ?? null;
+              setCoverImage(file);
+            }}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
 
-        {/* Course Description */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
             Course Description
@@ -199,15 +256,16 @@ export default function AddCoursePage() {
             value={formData.description}
             onChange={handleChange}
             placeholder="Enter course description"
-            className="w-full rounded-lg border border-slate-300 px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={4}
+            required
           />
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-end gap-4 pt-4">
+        <div className="flex justify-end gap-4 pt-2">
           <button
             type="button"
+            onClick={() => router.push("/manage-content/courses")}
             className="rounded-xl border border-slate-300 px-6 py-3 hover:bg-slate-100"
           >
             Cancel
@@ -215,9 +273,10 @@ export default function AddCoursePage() {
 
           <button
             type="submit"
-            className="rounded-xl bg-blue-600 px-8 py-3 text-white hover:bg-blue-700"
+            disabled={submitting}
+            className="rounded-xl bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Save Course
+            {submitting ? "Saving..." : "Save Course"}
           </button>
         </div>
       </form>

@@ -1,61 +1,102 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+import { getCourses, type Course } from "@/services/courses";
 import CourseCard from "./CourseCard";
 
-const courses = [
-  {
-    id: "course-101",
-    title: "Advanced Web Design",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
-    students: 48,
-    completion: 78,
-  },
-  {
-    id: "course-102",
-    title: "Data Visualization",
-    image:
-      "https://images.unsplash.com/photo-1555949963-aa79dcee981c",
-    students: 62,
-    completion: 42,
-  },
-  {
-    id: "course-103",
-    title: "Introduction to UI/UX",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-    students: 0,
-    completion: 0,
-  },
-];
-
 interface CourseGridProps {
-  getCourseHref?: (courseId: string) => string;
+  courses?: Course[];
+  getCourseHref?: (courseId: number) => string;
 }
 
 export default function CourseGrid({
+  courses: providedCourses,
   getCourseHref,
 }: CourseGridProps) {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(
+    !providedCourses
+  );
+
+  useEffect(() => {
+    if (providedCourses) return;
+
+    const loadCourses = async () => {
+      try {
+        const data = await getCourses();
+        setCourses(data);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+
+        if (
+          axios.isAxiosError(error) &&
+          (error.response?.status === 401 ||
+            error.response?.status === 403)
+        ) {
+          setCourses([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadCourses();
+  }, [providedCourses]);
+
+  const displayedCourses =
+    providedCourses ?? courses;
+  const isLoading = providedCourses
+    ? false
+    : loading;
+
+  if (isLoading) {
+    return (
+      <section>
+        <h2 className="mb-6 text-2xl font-bold">
+          My Courses
+        </h2>
+
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
+          Loading courses...
+        </div>
+      </section>
+    );
+  }
+
+  if (displayedCourses.length === 0) {
+    return (
+      <section>
+        <h2 className="mb-6 text-2xl font-bold">
+          My Courses
+        </h2>
+
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
+          No courses found yet.
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section>
-      <h2 className="text-2xl font-bold mb-6">
+      <h2 className="mb-6 text-2xl font-bold">
         My Courses
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {courses.map((course) => {
-          const { id, ...courseProps } = course;
-
-          return (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {displayedCourses.map((course) => (
           <CourseCard
-            key={id}
+            key={course.id}
+            course={course}
             href={
               getCourseHref
-                ? getCourseHref(id)
+                ? getCourseHref(course.id)
                 : undefined
             }
-            {...courseProps}
           />
-          );
-        })}
+        ))}
       </div>
     </section>
   );
