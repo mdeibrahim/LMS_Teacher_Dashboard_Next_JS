@@ -1,0 +1,603 @@
+{
+  "info": {
+    "_postman_id": "39d2cf58-df91-48db-b6d6-f89a17a6578f",
+    "name": "LMS System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49679750"
+  },
+  "item": [
+    {
+      "name": "Teacher Dashboard",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "eibrahim11.dev@gmail.com",
+                      "type": "text",
+                      "uuid": "323e5bb7-b960-4e77-ac18-e8ae3363804e"
+                    },
+                    {
+                      "key": "password",
+                      "value": "asdewq123",
+                      "type": "text",
+                      "uuid": "1c4ff950-dd93-4e5a-afb8-7052b1598061"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}auth/login/",
+                  "host": [
+                    "{{base_url}}auth"
+                  ],
+                  "path": [
+                    "login",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Register",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "email",
+                      "value": "eibrahim11.dev@gmail.com",
+                      "type": "text",
+                      "uuid": "323e5bb7-b960-4e77-ac18-e8ae3363804e"
+                    },
+                    {
+                      "key": "password",
+                      "value": "asdewq123",
+                      "type": "text",
+                      "uuid": "1c4ff950-dd93-4e5a-afb8-7052b1598061"
+                    },
+                    {
+                      "key": "confirm_password",
+                      "value": "asdewq123",
+                      "type": "text",
+                      "uuid": "dfde1900-953d-4e2b-84c8-b5a63b37fce9"
+                    },
+                    {
+                      "key": "full_name",
+                      "value": "eibrahim",
+                      "type": "text",
+                      "uuid": "a1f51620-7c7b-43c7-920a-ec015b34ea08"
+                    },
+                    {
+                      "key": "phone_number",
+                      "value": "01770295204",
+                      "type": "text",
+                      "uuid": "a3bb0560-8fb5-411d-96ea-fc51752090a7"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}auth/register/",
+                  "host": [
+                    "{{base_url}}auth"
+                  ],
+                  "path": [
+                    "register",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Profile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}profile/",
+                  "host": [
+                    "{{base_url}}profile"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Profile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "phone_number",
+                      "value": "01952485215",
+                      "type": "text",
+                      "uuid": "83f294f6-9b90-4029-9cff-2f16405bb665"
+                    },
+                    {
+                      "key": "profile_picture",
+                      "type": "file",
+                      "uuid": "05da6155-92d6-4473-b968-f2191b43be90",
+                      "src": "postman-cloud:///1f16e56c-f5a4-4b00-ad27-0d9a84a96b4b"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}profile/",
+                  "host": [
+                    "{{base_url}}profile"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Courses",
+          "item": [
+            {
+              "name": "Category Sub Category List",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}category-subcategory-list/",
+                  "host": [
+                    "{{base_url}}category-subcategory-list"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Sub Category",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Humanities",
+                      "type": "text",
+                      "uuid": "971a33b2-248d-45a0-b43c-72fc543dae31"
+                    },
+                    {
+                      "key": "description",
+                      "value": "aa",
+                      "type": "text",
+                      "uuid": "1f2e335c-6fc4-4803-8c15-f9b487a99f59"
+                    },
+                    {
+                      "key": "category",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "7ed517ae-7ebc-4413-8318-41132e2f74c6"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}create-subcategory/",
+                  "host": [
+                    "{{base_url}}create-subcategory"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Course",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "Physics",
+                      "type": "text",
+                      "uuid": "971a33b2-248d-45a0-b43c-72fc543dae31"
+                    },
+                    {
+                      "key": "description",
+                      "value": "aa",
+                      "type": "text",
+                      "uuid": "1f2e335c-6fc4-4803-8c15-f9b487a99f59"
+                    },
+                    {
+                      "key": "cover_image",
+                      "type": "file",
+                      "uuid": "86389b17-92c4-4afc-8d47-58b97c85ddc3",
+                      "src": "postman-cloud:///1f16e592-6723-4680-9a37-62df893215b8"
+                    },
+                    {
+                      "key": "price",
+                      "value": "350",
+                      "type": "text",
+                      "uuid": "3dc92828-2581-4da9-a76b-b7d6c08bf754"
+                    },
+                    {
+                      "key": "is_published",
+                      "value": "true",
+                      "type": "text",
+                      "uuid": "417b6973-53ce-4ecc-a3c4-3f362b7fed8d"
+                    },
+                    {
+                      "key": "category",
+                      "value": "2",
+                      "type": "text",
+                      "uuid": "7ed517ae-7ebc-4413-8318-41132e2f74c6"
+                    },
+                    {
+                      "key": "subcategory",
+                      "value": "all",
+                      "type": "text",
+                      "uuid": "67a141ad-e06d-441f-bc64-16f1ac1c0376",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}create-course/",
+                  "host": [
+                    "{{base_url}}create-course"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Course List",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}course-list/",
+                  "host": [
+                    "{{base_url}}course-list"
+                  ],
+                  "path": [
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Module",
+          "item": [
+            {
+              "name": "Module list",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}module-list/?course_id=1",
+                  "host": [
+                    "{{base_url}}module-list"
+                  ],
+                  "path": [
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "course_id",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Module details",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}module-list/?module_id=4&course_id=1",
+                  "host": [
+                    "{{base_url}}module-list"
+                  ],
+                  "path": [
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "module_id",
+                      "value": "4"
+                    },
+                    {
+                      "key": "course_id",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Add Module",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "chapter test11",
+                      "type": "text",
+                      "uuid": "2e8cff5e-19c2-4f02-97ff-6bb2d3b8eb3c"
+                    },
+                    {
+                      "key": "description",
+                      "value": "NA",
+                      "type": "text",
+                      "uuid": "4e4ea793-bb3d-4f66-a2e7-f52b0f1bf7e2"
+                    },
+                    {
+                      "key": "order",
+                      "value": "4",
+                      "type": "text",
+                      "uuid": "fbc95369-37b3-40bb-9ecf-1408b54608bd"
+                    },
+                    {
+                      "key": "is_published",
+                      "value": "false",
+                      "type": "text",
+                      "uuid": "96d6c5bb-2b49-4f95-9921-6d45707d381a"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}create-module/?course_id=1",
+                  "host": [
+                    "{{base_url}}create-module"
+                  ],
+                  "path": [
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "course_id",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Module",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "chapter test101",
+                      "type": "text",
+                      "uuid": "2e8cff5e-19c2-4f02-97ff-6bb2d3b8eb3c"
+                    },
+                    {
+                      "key": "description",
+                      "value": "NA",
+                      "type": "text",
+                      "uuid": "4e4ea793-bb3d-4f66-a2e7-f52b0f1bf7e2"
+                    },
+                    {
+                      "key": "order",
+                      "value": "4",
+                      "type": "text",
+                      "uuid": "fbc95369-37b3-40bb-9ecf-1408b54608bd"
+                    },
+                    {
+                      "key": "is_published",
+                      "value": "false",
+                      "type": "text",
+                      "uuid": "96d6c5bb-2b49-4f95-9921-6d45707d381a"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}create-module/?course_id=1&module_id=6",
+                  "host": [
+                    "{{base_url}}create-module"
+                  ],
+                  "path": [
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "course_id",
+                      "value": "1"
+                    },
+                    {
+                      "key": "module_id",
+                      "value": "6"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Module",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}create-module/?course_id=1&module_id=6",
+                  "host": [
+                    "{{base_url}}create-module"
+                  ],
+                  "path": [
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "course_id",
+                      "value": "1"
+                    },
+                    {
+                      "key": "module_id",
+                      "value": "6"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

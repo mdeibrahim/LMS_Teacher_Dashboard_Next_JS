@@ -29,6 +29,17 @@ export const getCourses = async (): Promise<Course[]> => {
 };
 
 
+export const getCourse = async (
+  courseId: number
+): Promise<Course> => {
+  const response = await api.get(
+    `/course-detail/${courseId}/`
+  );
+
+  return response.data.data;
+};
+
+
 export const createCourse = async (
   data: FormData
 ) => {
