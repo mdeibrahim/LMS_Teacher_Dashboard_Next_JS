@@ -306,9 +306,22 @@ export default function ModulesPage() {
                             }}
                             className="text-blue-600 p-1 rounded-2xl hover:text-white hover:bg-blue-500 cursor-pointer"
                           >
-                            <Pencil
+                              <Pencil
                               size={14}
                             />
+                          </Link>
+
+                          <Link
+                            href={{
+                              pathname: "/manage-content/lessons/add-lesson",
+                              query: {
+                                courseId: course.id,
+                                moduleId: module.id,
+                              },
+                            }}
+                            className="text-emerald-600 p-1 rounded-2xl hover:text-white hover:bg-emerald-500 cursor-pointer"
+                          >
+                            <Plus size={14} />
                           </Link>
 
                           <AlertDialog>
