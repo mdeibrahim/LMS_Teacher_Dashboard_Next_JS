@@ -20,6 +20,7 @@ export interface MediaDraft {
   textContent: string;
   youtubeUrl: string;
   fileName: string;
+  file: File | null;
 }
 
 export interface AccordionSection {

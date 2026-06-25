@@ -52,6 +52,7 @@ export default function MediaModal({
     item?.youtubeUrl ?? ""
   );
   const [fileName, setFileName] = useState(item?.fileName ?? "");
+  const [file, setFile] = useState<File | null>(null);
 
   if (!open) {
     return null;
@@ -169,6 +170,7 @@ export default function MediaModal({
                 }
                 onChange={(event) => {
                   const file = event.target.files?.[0];
+                  setFile(file ?? null);
                   setFileName(file?.name ?? "");
                 }}
                 className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
@@ -199,6 +201,7 @@ export default function MediaModal({
                   textContent,
                   youtubeUrl,
                   fileName,
+                  file,
                 })
               }
               className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"

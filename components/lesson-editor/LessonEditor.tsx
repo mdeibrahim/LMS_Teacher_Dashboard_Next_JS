@@ -87,6 +87,7 @@ export default function LessonEditor({
   const contentRef = useRef<HTMLDivElement | null>(null);
   const savedRangeRef = useRef<Range | null>(null);
   const nextItemIdRef = useRef(1);
+  const mediaFilesRef = useRef<Map<number, File>>(new Map());
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -296,13 +297,28 @@ export default function LessonEditor({
       return;
     }
 
+    const requiresFile =
+      draft.contentType === "image" ||
+      draft.contentType === "audio" ||
+      draft.contentType === "video";
+
+    const existingFile = editingMediaItem
+      ? mediaFilesRef.current.get(editingMediaItem.id) ?? null
+      : null;
+    const nextFile = draft.file ?? existingFile;
+
+    if (requiresFile && !nextFile) {
+      toast.error("Please select a file for this media item");
+      return;
+    }
+
     const nextMediaItem: MediaItem = {
       id: editingMediaItem?.id ?? nextItemIdRef.current++,
       title: draft.title,
       contentType: draft.contentType,
       textContent: draft.textContent,
       youtubeUrl: draft.youtubeUrl,
-      fileName: draft.fileName,
+      fileName: draft.fileName || nextFile?.name || "",
     };
 
     setMediaItems((current) => {
@@ -318,6 +334,12 @@ export default function LessonEditor({
 
       return [...current, nextMediaItem];
     });
+
+    if (requiresFile && nextFile) {
+      mediaFilesRef.current.set(nextMediaItem.id, nextFile);
+    } else {
+      mediaFilesRef.current.delete(nextMediaItem.id);
+    }
 
     setMediaModalOpen(false);
     setEditingMediaItem(null);
@@ -409,6 +431,9 @@ export default function LessonEditor({
         body_content: composedBody,
         order,
         is_published: isPublished,
+        mediaItems,
+        accordionSections,
+        mediaFiles: mediaFilesRef.current,
       });
 
       setStatusTone("success");
