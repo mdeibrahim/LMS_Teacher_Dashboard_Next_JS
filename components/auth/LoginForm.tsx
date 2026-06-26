@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
 
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { LoginTeacher } from "@/services/auth";
 import { toast } from "sonner";

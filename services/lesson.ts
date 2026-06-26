@@ -1,5 +1,9 @@
 import api from "./api";
 
+/* ===========================
+   Lesson
+=========================== */
+
 export interface Lesson {
   id: number;
   title: string;
@@ -8,31 +12,61 @@ export interface Lesson {
   is_published: boolean;
 }
 
-export type LessonMediaPayload = {
-  id: number;
-  title: string;
-  contentType: "text" | "image" | "audio" | "video" | "youtube";
-  textContent: string;
-  youtubeUrl: string;
-  fileName: string;
-};
+/* ===========================
+   Resource
+=========================== */
 
-export type LessonAccordionPayload = {
-  id: number;
+export type ResourceContentType =
+  | "text"
+  | "image"
+  | "video"
+  | "audio"
+  | "pdf"
+  | "youtube";
+
+export interface ResourcePayload {
+  id?: number;
+  title: string;
+  content_type: ResourceContentType;
+  text_content?: string;
+  external_url?: string;
+  embed_url?: string;
+  order: number;
+  is_preview: boolean;
+  is_published: boolean;
+  duration_seconds?: number;
+
+  /**
+   * Used to match uploaded file
+   */
+  file_key?: string;
+}
+
+/* ===========================
+   Accordion Section
+=========================== */
+
+export interface AccordionSection {
+  id?: number;
   title: string;
   content: string;
-  isOpenByDefault: boolean;
-};
+  order: number;
+  is_open_by_default: boolean;
+}
 
-export type LessonPayload = {
+/* ===========================
+   Lesson Payload
+=========================== */
+
+export interface LessonPayload {
   title: string;
   body_content: string;
   order: number;
   is_published: boolean;
-  mediaItems: LessonMediaPayload[];
-  accordionSections: LessonAccordionPayload[];
-  mediaFiles: Map<number, File>;
-};
+  resources: ResourcePayload[];
+  accordion_sections: AccordionSection[];
+  mediaFiles: Record<string, File>;
+}
 
 const appendJsonField = (
   formData: FormData,
@@ -44,17 +78,10 @@ const appendJsonField = (
 
 const appendMediaFiles = (
   formData: FormData,
-  mediaItems: LessonMediaPayload[],
-  mediaFiles: Map<number, File>
+  mediaFiles: Record<string, File>
 ) => {
-  mediaItems.forEach((item) => {
-    const file = mediaFiles.get(item.id);
-
-    if (!file) {
-      return;
-    }
-
-    formData.append(`media_file_${item.id}`, file);
+  Object.entries(mediaFiles).forEach(([key, file]) => {
+    formData.append(key, file);
   });
 };
 
@@ -69,14 +96,22 @@ const buildFormData = (data: LessonPayload) => {
     String(data.is_published)
   );
 
-  appendJsonField(formData, "resources", data.mediaItems);
+  appendJsonField(
+    formData,
+    "resources",
+    data.resources
+  );
+
   appendJsonField(
     formData,
     "accordion_sections",
-    data.accordionSections
+    data.accordion_sections
   );
 
-  appendMediaFiles(formData, data.mediaItems, data.mediaFiles);
+  appendMediaFiles(
+    formData,
+    data.mediaFiles
+  );
 
   return formData;
 };

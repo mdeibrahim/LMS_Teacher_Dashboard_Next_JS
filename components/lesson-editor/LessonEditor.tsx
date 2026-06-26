@@ -17,6 +17,7 @@ import { getCourses, type Course } from "@/services/courses";
 import {
   createLesson,
   getLessons,
+  type ResourcePayload,
 } from "@/services/lesson";
 import {
   getModules,
@@ -225,7 +226,7 @@ export default function LessonEditor({
     return true;
   };
 
-  const executeCommand = (command: string, value: string | null = null) => {
+  const executeCommand = (command: string, value?: string) => {
     if (!contentRef.current) {
       return;
     }
@@ -425,15 +426,51 @@ export default function LessonEditor({
         mediaItems,
         accordionSections,
       })}`;
+      const mediaFiles = Object.fromEntries(
+        mediaFilesRef.current
+      ) as Record<string, File>;
+      const resources: ResourcePayload[] = mediaItems.map(
+        (item, index) => ({
+          title: item.title,
+          content_type: item.contentType,
+          text_content:
+            item.contentType === "text" ? item.textContent : undefined,
+          external_url:
+            item.contentType === "youtube"
+              ? item.youtubeUrl
+              : undefined,
+          embed_url:
+            item.contentType === "youtube"
+              ? item.youtubeUrl
+              : undefined,
+          order: index + 1,
+          is_preview: false,
+          is_published: true,
+          file_key:
+            item.contentType === "image" ||
+            item.contentType === "audio" ||
+            item.contentType === "video"
+              ? String(item.id)
+              : undefined,
+        })
+      );
+      const accordion_sections = accordionSections.map(
+        (section, index) => ({
+          title: section.title,
+          content: section.content,
+          order: index + 1,
+          is_open_by_default: section.isOpenByDefault,
+        })
+      );
 
       await createLesson(activeModuleId, {
         title: title.trim(),
         body_content: composedBody,
         order,
         is_published: isPublished,
-        mediaItems,
-        accordionSections,
-        mediaFiles: mediaFilesRef.current,
+        resources,
+        accordion_sections,
+        mediaFiles,
       });
 
       setStatusTone("success");
