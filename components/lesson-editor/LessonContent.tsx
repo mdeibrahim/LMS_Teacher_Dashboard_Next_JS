@@ -50,15 +50,9 @@ const LessonContent = forwardRef<
       return;
     }
 
-    if (element.dataset.initialized === "true") {
-      return;
-    }
-
     if (element.innerHTML !== value) {
       element.innerHTML = value;
     }
-
-    element.dataset.initialized = "true";
   }, [ref, value]);
 
   return (

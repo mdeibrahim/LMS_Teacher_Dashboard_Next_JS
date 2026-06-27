@@ -180,12 +180,11 @@ export const createLesson = async (
 };
 
 export const updateLesson = async (
-  moduleId: number,
   lessonId: number,
   data: LessonUpdatePayload
 ) => {
   const response = await api.patch(
-    `/update-lesson/?module_id=${moduleId}&lesson_id=${lessonId}`,
+    `/update-lesson/?lesson_id=${lessonId}`,
     buildFormData(data),
     {
       headers: {

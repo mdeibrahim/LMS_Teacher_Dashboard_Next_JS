@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { getCourses, type Course } from "@/services/courses";
 import {
   createLesson,
+  getLesson,
   getLessons,
   updateLesson,
   type ResourcePayload,
@@ -52,6 +53,7 @@ type SaveTone = "idle" | "dirty" | "saving" | "success" | "error";
 interface LessonEditorProps {
   initialCourseId?: number;
   initialModuleId?: number;
+  initialLessonId?: number;
 }
 
 function buildMetadataMarkup({
@@ -91,9 +93,50 @@ function normalizeId(value: number | string | null | undefined) {
   return null;
 }
 
+function extractLessonContent(
+  html: string
+) {
+  const metaMatch = html.match(
+    /<script type="application\/json" data-lesson-editor-meta="true">([\s\S]*?)<\/script>/i
+  );
+
+  const bodyContent = metaMatch
+    ? html.replace(metaMatch[0], "")
+    : html;
+
+  if (!metaMatch?.[1]) {
+    return {
+      bodyContent,
+      mediaItems: [] as MediaItem[],
+      accordionSections: [] as AccordionSection[],
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(metaMatch[1]) as {
+      mediaItems?: MediaItem[];
+      accordionSections?: AccordionSection[];
+    };
+
+    return {
+      bodyContent,
+      mediaItems: parsed.mediaItems ?? [],
+      accordionSections: parsed.accordionSections ?? [],
+    };
+  } catch (error) {
+    console.warn("Failed to parse lesson metadata", error);
+    return {
+      bodyContent,
+      mediaItems: [] as MediaItem[],
+      accordionSections: [] as AccordionSection[],
+    };
+  }
+}
+
 export default function LessonEditor({
   initialCourseId,
   initialModuleId,
+  initialLessonId,
 }: LessonEditorProps) {
   const router = useRouter();
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -117,9 +160,11 @@ export default function LessonEditor({
   const [statusTone, setStatusTone] = useState<SaveTone>("idle");
   const [statusMessage, setStatusMessage] = useState("Ready to draft");
   const [loading, setLoading] = useState(true);
+  const [lessonLoading, setLessonLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [moduleLoading, setModuleLoading] = useState(false);
   const [lessonsLoading, setLessonsLoading] = useState(false);
+  const [bodyContent, setBodyContent] = useState("");
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [accordionSections, setAccordionSections] = useState<
@@ -131,6 +176,8 @@ export default function LessonEditor({
     useState<MediaItem | null>(null);
   const [editingAccordionItem, setEditingAccordionItem] =
     useState<AccordionSection | null>(null);
+  const editingLessonId = normalizeId(initialLessonId);
+  const isEditingLesson = isValidId(editingLessonId);
 
   const activeCourseId = selectedCourseId ?? courses[0]?.id ?? null;
   const activeModuleId = selectedModuleId ?? modules[0]?.id ?? null;
@@ -207,6 +254,10 @@ export default function LessonEditor({
 
   useEffect(() => {
     const fetchLessonCount = async () => {
+      if (isEditingLesson) {
+        return;
+      }
+
       if (!isValidId(activeModuleId)) {
         return;
       }
@@ -223,7 +274,58 @@ export default function LessonEditor({
     };
 
     void fetchLessonCount();
-  }, [activeModuleId]);
+  }, [activeModuleId, isEditingLesson]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchLesson = async () => {
+      if (!isEditingLesson || !isValidId(activeModuleId)) {
+        return;
+      }
+
+      try {
+        setLessonLoading(true);
+        const data = await getLesson(activeModuleId, editingLessonId as number);
+
+        if (cancelled) {
+          return;
+        }
+
+        const extracted = extractLessonContent(data.body_content);
+
+        setTitle(data.title);
+        setOrder(data.order);
+        setIsPublished(data.is_published);
+        setBodyContent(extracted.bodyContent);
+        setMediaItems(extracted.mediaItems);
+        setAccordionSections(extracted.accordionSections);
+        nextItemIdRef.current =
+          Math.max(
+            0,
+            ...extracted.mediaItems.map((item) => item.id),
+            ...extracted.accordionSections.map((section) => section.id)
+          ) + 1;
+        setStatusTone("idle");
+        setStatusMessage("Lesson loaded");
+      } catch (error) {
+        console.error("Failed to load lesson", error);
+        toast.error("Failed to load lesson");
+        setStatusTone("error");
+        setStatusMessage("Unable to load lesson");
+      } finally {
+        if (!cancelled) {
+          setLessonLoading(false);
+        }
+      }
+    };
+
+    void fetchLesson();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeModuleId, editingLessonId, isEditingLesson]);
 
   const markDirty = () => {
     setStatusTone("dirty");
@@ -625,7 +727,7 @@ export default function LessonEditor({
 
         if (repairedBody !== composedBody) {
           try {
-            await updateLesson(activeModuleId, lessonId, {
+            await updateLesson(lessonId, {
               body_content: repairedBody,
             });
           } catch (patchError) {

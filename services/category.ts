@@ -11,8 +11,7 @@ export interface Category {
   subcategories: Subcategory[];
 }
 
-export const getCategories = async () => {
+export const getCategories = async (): Promise<Category[]> => {
   const response = await api.get("/category-subcategory-list/");
-
   return response.data.data;
 };

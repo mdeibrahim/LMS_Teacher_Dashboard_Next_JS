@@ -18,11 +18,13 @@ export default function AddLessonPage() {
 
   const courseId = toPositiveNumber(searchParams.get("courseId"));
   const moduleId = toPositiveNumber(searchParams.get("moduleId"));
+  const lessonId = toPositiveNumber(searchParams.get("lessonId"));
 
   return (
     <LessonEditor
       initialCourseId={courseId}
       initialModuleId={moduleId}
+      initialLessonId={lessonId}
     />
   );
 }
