@@ -192,9 +192,9 @@ export default function Sidebar({
 
         {/* Settings */}
         <Link
-          href="/dashboard/settings"
+          href="/settings"
           onClick={closeSidebar}
-          className={`mt-2 flex items-center gap-3 px-5 py-4 rounded-xl font-medium ${isActive("/dashboard/settings")
+          className={`mt-2 flex items-center gap-3 px-5 py-4 rounded-xl font-medium ${isActive("/settings")
               ? "bg-blue-50 text-blue-600"
               : "text-slate-700 hover:bg-slate-50"
             }`}
