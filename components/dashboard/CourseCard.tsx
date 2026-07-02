@@ -23,7 +23,8 @@ export default function CourseCard({
     "/default_course_cover.jpg";
 
   const cardHref =
-    href || `/manage-content/courses/${course.id}`;
+    href ||
+    `/manage-content/courses/edit-course?courseId=${course.id}`;
 
   return (
     <Link
@@ -41,11 +42,10 @@ export default function CourseCard({
           />
 
           <span
-            className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold ${
-              status === "active"
+            className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold ${status === "active"
                 ? "bg-green-100 text-green-700"
                 : "bg-amber-100 text-amber-700"
-            }`}
+              }`}
           >
             {status === "active"
               ? "Active"

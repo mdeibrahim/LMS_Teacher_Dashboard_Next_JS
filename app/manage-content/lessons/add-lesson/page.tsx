@@ -1,7 +1,3 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-
 import LessonEditor from "@/components/lesson-editor/LessonEditor";
 
 function toPositiveNumber(value: string | null) {
@@ -13,12 +9,22 @@ function toPositiveNumber(value: string | null) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-export default function AddLessonPage() {
-  const searchParams = useSearchParams();
+type AddLessonPageProps = {
+  searchParams?: Promise<{
+    courseId?: string;
+    moduleId?: string;
+    lessonId?: string;
+  }>;
+};
 
-  const courseId = toPositiveNumber(searchParams.get("courseId"));
-  const moduleId = toPositiveNumber(searchParams.get("moduleId"));
-  const lessonId = toPositiveNumber(searchParams.get("lessonId"));
+export default async function AddLessonPage({
+  searchParams,
+}: AddLessonPageProps) {
+  const resolvedSearchParams = await searchParams;
+
+  const courseId = toPositiveNumber(resolvedSearchParams?.courseId ?? null);
+  const moduleId = toPositiveNumber(resolvedSearchParams?.moduleId ?? null);
+  const lessonId = toPositiveNumber(resolvedSearchParams?.lessonId ?? null);
 
   return (
     <LessonEditor

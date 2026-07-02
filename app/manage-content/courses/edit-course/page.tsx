@@ -1,24 +1,30 @@
-import Link from "next/link";
+type EditCoursePageProps = {
+    searchParams: Promise<{
+        courseId?: string;
+    }>;
+};
 
+export default async function EditCoursePage({
+    searchParams,
+}: EditCoursePageProps) {
+    const resolvedSearchParams = await searchParams;
+    const courseId = resolvedSearchParams.courseId;
 
-
-export default function CoursesPage() {
     return (
-        <div className="space-y-8">
-            <Link
-                href="/manage-content/courses/add-course"
-                className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl bg-gray-200 p-4 shadow-sm transition-all hover:bg-gray-300"
-            >
-                <span className="text-5xl font-bold text-green-600">
-                    +
-                </span>
-                <p className="mt-2 font-bold text-emerald-600">
+        <div className="space-y-6">
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
+                <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
                     Edit Course
                 </p>
-            </Link>
+
+                <h1 className="mt-2 text-2xl font-bold text-slate-900">
+                    {courseId ? `Course #${courseId}` : "Select a course"}
+                </h1>
+
+                <p className="mt-2 text-sm text-slate-600">
+                    This page is now the target for course-card clicks. Add the edit form here next.
+                </p>
+            </div>
         </div>
-
-
-
     );
 }

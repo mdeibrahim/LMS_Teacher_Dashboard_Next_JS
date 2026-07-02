@@ -1,20 +1,21 @@
-"use client";
-
-import { useParams, useSearchParams } from "next/navigation";
-
 import ModuleEditForm from "@/components/manage-content/ModuleEditForm";
 
-export default function EditModulePage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
+type EditModulePageProps = {
+  params: Promise<{
+    moduleId: string;
+  }>;
+  searchParams?: {
+    courseId?: string;
+  };
+};
 
-  const moduleIdValue = params.moduleId;
-  const moduleId = Number(
-    Array.isArray(moduleIdValue)
-      ? moduleIdValue[0]
-      : moduleIdValue
-  );
-  const courseIdParam = searchParams.get("courseId");
+export default async function EditModulePage({
+  params,
+  searchParams,
+}: EditModulePageProps) {
+  const { moduleId } = await params;
+  const moduleIdNumber = Number(moduleId);
+  const courseIdParam = searchParams?.courseId;
   const courseId = courseIdParam ? Number(courseIdParam) : undefined;
 
   return (
@@ -24,7 +25,7 @@ export default function EditModulePage() {
           ? (courseId as number)
           : undefined
       }
-      moduleId={moduleId}
+      moduleId={moduleIdNumber}
     />
   );
 }
