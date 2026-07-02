@@ -44,10 +44,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <AuthLayout
-      title="Forgot Password"
-      subtitle="Enter your email address to receive a verification code."
-    >
+    <AuthLayout>
       <form
         onSubmit={handleSubmit}
         className="space-y-6"

@@ -5,14 +5,10 @@ import Link from "next/link";
 import { GraduationCap } from "lucide-react";
 
 interface AuthLayoutProps {
-  title: string;
-  subtitle: string;
   children: ReactNode;
 }
 
 export default function AuthLayout({
-  title,
-  subtitle,
   children,
 }: AuthLayoutProps) {
   return (
