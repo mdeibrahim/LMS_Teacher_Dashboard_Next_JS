@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
-  FolderTree,
   ChevronRight,
+  FolderTree,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   Category,
@@ -56,42 +56,54 @@ export default function CategoriesPage() {
         </p>
       </div>
 
-      {categories.map((category) => (
-        <div
-          key={category.id}
-          className="bg-white rounded-3xl shadow-sm p-6"
-        >
-          <div className="flex items-center gap-3">
-            <FolderTree
-              className="text-blue-600"
-              size={24}
-            />
+      {categories.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+          <p className="text-base font-medium text-slate-700">
+            No categories assigned by Admin yet.
+          </p>
 
-            <h2 className="text-xl font-bold">
-              {category.name}
-            </h2>
-          </div>
-
-          <div className="mt-5 grid md:grid-cols-3 gap-3">
-            {category.subcategories.map(
-              (subcategory) => (
-                <div
-                  key={subcategory.id}
-                  className="flex items-center gap-2 bg-slate-50 rounded-xl px-4 py-3"
-                >
-                  <ChevronRight
-                    size={16}
-                  />
-
-                  <span>
-                    {subcategory.name}
-                  </span>
-                </div>
-              )
-            )}
-          </div>
+          <p className="mt-2 text-sm text-slate-500">
+            Categories will appear here once they are created and assigned.
+          </p>
         </div>
-      ))}
+      ) : (
+        categories.map((category) => (
+          <div
+            key={category.id}
+            className="bg-white rounded-3xl shadow-sm p-6"
+          >
+            <div className="flex items-center gap-3">
+              <FolderTree
+                className="text-blue-600"
+                size={24}
+              />
+
+              <h2 className="text-xl font-bold">
+                {category.name}
+              </h2>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {category.subcategories.length > 0 ? (
+                category.subcategories.map((subcategory) => (
+                  <div
+                    key={subcategory.id}
+                    className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3"
+                  >
+                    <ChevronRight size={16} />
+
+                    <span>{subcategory.name}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500">
+                  No subcategories available.
+                </p>
+              )}
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 }

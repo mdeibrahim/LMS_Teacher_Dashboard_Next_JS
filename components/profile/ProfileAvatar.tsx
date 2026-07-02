@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { Camera, User } from "lucide-react";
+            import { Camera, User } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 
