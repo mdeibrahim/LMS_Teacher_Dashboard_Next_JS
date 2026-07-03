@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import AuthLayout from "@/app/auth/layout";
-// import { forgotPassword } from "@/services/auth";
+import {
+  ForgotPassword,
+  getBackendMessage,
+} from "@/services/auth";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -27,9 +29,14 @@ export default function ForgotPasswordPage() {
     try {
       setLoading(true);
 
-      // await forgotPassword(email);
+      const response = await ForgotPassword({ email });
 
-      toast.success("OTP sent successfully.");
+      toast.success(
+        getBackendMessage(
+          response,
+          "OTP sent successfully."
+        )
+      );
 
       router.push(
         `/auth/verify-otp?email=${encodeURIComponent(email)}&source=forgot-password`
@@ -37,53 +44,56 @@ export default function ForgotPasswordPage() {
     } catch (error) {
       console.error(error);
 
-      toast.error("Failed to send OTP.");
+      toast.error(
+        getBackendMessage(
+          error,
+          "Failed to send OTP."
+        )
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
-      >
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Email Address
-          </label>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6"
+    >
+      <div>
+        <label className="mb-2 block text-sm font-medium text-slate-700">
+          Email Address
+        </label>
 
-          <div className="relative">
-            <Mail
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
+        <div className="relative">
+          <Mail
+            size={18}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+          />
 
-            <input
-              type="email"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              placeholder="teacher@example.com"
-              className="w-full rounded-xl border border-slate-300 py-3 pl-11 pr-4 outline-none transition focus:border-blue-600"
-            />
-          </div>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            placeholder="teacher@example.com"
+            className="w-full rounded-xl border border-slate-300 py-3 pl-11 pr-4 outline-none transition focus:border-blue-600"
+          />
         </div>
+      </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          <Send size={18} />
+      <button
+        type="submit"
+        disabled={loading}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <Send size={18} />
 
-          {loading
-            ? "Sending OTP..."
-            : "Send OTP"}
-        </button>
-      </form>
-    </AuthLayout>
+        {loading
+          ? "Sending OTP..."
+          : "Send OTP"}
+      </button>
+    </form>
   );
 }

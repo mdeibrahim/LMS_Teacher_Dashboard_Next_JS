@@ -16,7 +16,10 @@ import { toast } from "sonner";
 
 import Input from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
-import { RegisterTeacher } from "@/services/auth";
+import {
+  RegisterTeacher,
+  getBackendMessage,
+} from "@/services/auth";
 
 
 
@@ -54,8 +57,10 @@ export default function RegisterForm() {
         await RegisterTeacher(formData);
 
       toast.success(
-        response.message ||
-        "Teacher registered successfully"
+        getBackendMessage(
+          response,
+          "Teacher registered successfully"
+        )
       );
 
       setTimeout(() => {
@@ -70,8 +75,10 @@ export default function RegisterForm() {
 
       if (axios.isAxiosError(error)) {
         toast.error(
-          error.response?.data?.email?.[0] ||
-          "Registration failed"
+          getBackendMessage(
+            error.response?.data,
+            "Registration failed"
+          )
         );
       } else {
         toast.error(

@@ -10,14 +10,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-// import { resetPassword } from "@/services/auth";
+import {
+    ResetPassword,
+    getBackendMessage,
+} from "@/services/auth";
 
 export default function ResetPasswordForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const email = searchParams.get("email") ?? "";
-    const otp = searchParams.get("otp") ?? "";
+    const reset_token = searchParams.get("reset_token") ?? "";
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,19 +51,27 @@ export default function ResetPasswordForm() {
         try {
             setLoading(true);
 
-            // await resetPassword({
-            //   email,
-            //   otp,
-            //   password,
-            // });
+            await ResetPassword({
+                email,
+                reset_token : reset_token,
+                password,
+                confirm_password: confirmPassword,
+            });
 
-            toast.success("Password updated successfully.");
+            toast.success(
+                "Password updated successfully."
+            );
 
-            router.replace("/login");
+            router.replace("/auth/login");
         } catch (error) {
             console.error(error);
 
-            toast.error("Unable to reset password.");
+            toast.error(
+                getBackendMessage(
+                    error,
+                    "Unable to reset password."
+                )
+            );
         } finally {
             setLoading(false);
         }
@@ -133,10 +144,10 @@ export default function ResetPasswordForm() {
 
                         <span
                             className={`font-medium ${password.length >= 12
-                                    ? "text-green-600"
-                                    : password.length >= 8
-                                        ? "text-yellow-600"
-                                        : "text-red-500"
+                                ? "text-green-600"
+                                : password.length >= 8
+                                    ? "text-yellow-600"
+                                    : "text-red-500"
                                 }`}
                         >
                             {password.length >= 12
@@ -150,12 +161,12 @@ export default function ResetPasswordForm() {
                     <div className="h-2 rounded-full bg-slate-200">
                         <div
                             className={`h-full rounded-full transition-all ${password.length >= 12
-                                    ? "w-full bg-green-500"
-                                    : password.length >= 8
-                                        ? "w-2/3 bg-yellow-500"
-                                        : password.length
-                                            ? "w-1/3 bg-red-500"
-                                            : "w-0"
+                                ? "w-full bg-green-500"
+                                : password.length >= 8
+                                    ? "w-2/3 bg-yellow-500"
+                                    : password.length
+                                        ? "w-1/3 bg-red-500"
+                                        : "w-0"
                                 }`}
                         />
                     </div>

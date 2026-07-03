@@ -1,5 +1,50 @@
 import api from "./api";
 
+type BackendMessagePayload = {
+  message?: string;
+  detail?: string | string[];
+  error?: string | string[];
+  non_field_errors?: string[];
+  email?: string[];
+  password?: string[];
+  otp?: string[];
+};
+
+export const getBackendMessage = (
+  data: unknown,
+  fallback: string
+) => {
+  if (!data || typeof data !== "object") {
+    return fallback;
+  }
+
+  const payload = data as BackendMessagePayload;
+
+  const candidates = [
+    payload.message,
+    Array.isArray(payload.detail) ? payload.detail[0] : payload.detail,
+    Array.isArray(payload.error) ? payload.error[0] : payload.error,
+    payload.non_field_errors?.[0],
+    payload.email?.[0],
+    payload.password?.[0],
+    payload.otp?.[0],
+  ].filter(Boolean);
+
+  return candidates[0] || fallback;
+};
+
+const buildAuthFormData = <T extends object>(data: T) => {
+  const formData = new FormData();
+
+  for (const [key, value] of Object.entries(
+    data as Record<string, string>
+  )) {
+    formData.append(key, value);
+  }
+
+  return formData;
+};
+
 /* ===========================
    Register
 =========================== */
@@ -17,7 +62,12 @@ export const RegisterTeacher = async (
 ) => {
   const response = await api.post(
     "/auth/register/",
-    data
+    buildAuthFormData(data),
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
 
   return response.data;
@@ -37,7 +87,12 @@ export const LoginTeacher = async (
 ) => {
   const response = await api.post(
     "/auth/login/",
-    data
+    buildAuthFormData(data),
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
 
   return response.data;
@@ -69,6 +124,8 @@ export const ForgotPassword = async (
 export interface VerifyOTPPayload {
   email: string;
   otp: string;
+  type: "register" | "forgot-password";
+  reset_token?: string;
 }
 
 export const VerifyOTP = async (
@@ -108,7 +165,7 @@ export const ResendOTP = async (
 
 export interface ResetPasswordPayload {
   email: string;
-  otp: string;
+  reset_token: string;
   password: string;
   confirm_password: string;
 }

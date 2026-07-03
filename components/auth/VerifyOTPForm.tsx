@@ -8,7 +8,11 @@ import { toast } from "sonner";
 
 import OTPInput from "@/components/auth/OTPInput";
 
-import { ResendOTP, VerifyOTP } from "@/services/auth";
+import {
+    ResendOTP,
+    VerifyOTP,
+    getBackendMessage,
+} from "@/services/auth";
 
 export default function VerifyOTPForm() {
     const router = useRouter();
@@ -20,34 +24,6 @@ export default function VerifyOTPForm() {
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [seconds, setSeconds] = useState(10);
-
-    const getErrorMessage = (error: unknown, fallback: string) => {
-        if (!axios.isAxiosError(error)) {
-            return fallback;
-        }
-
-        const data = error.response?.data as
-            | {
-                message?: string;
-                detail?: string | string[];
-                error?: string | string[];
-                non_field_errors?: string[];
-                otp?: string[];
-                email?: string[];
-            }
-            | undefined;
-
-        const messageCandidates = [
-            data?.message,
-            Array.isArray(data?.detail) ? data?.detail[0] : data?.detail,
-            Array.isArray(data?.error) ? data?.error[0] : data?.error,
-            data?.non_field_errors?.[0],
-            data?.otp?.[0],
-            data?.email?.[0],
-        ].filter(Boolean);
-
-        return messageCandidates[0] || fallback;
-    };
 
     useEffect(() => {
         if (seconds === 0) return;
@@ -68,22 +44,31 @@ export default function VerifyOTPForm() {
         try {
             setLoading(true);
 
-            const response = await VerifyOTP({ email, otp });
+            const response = await VerifyOTP({ email, otp, type: source as "register" | "forgot-password" });
 
-            toast.success(response?.message || "OTP verified.");
+            toast.success(
+                getBackendMessage(response, "OTP verified.")
+            );
 
             if (source === "register") {
                 router.push("/auth/login");
                 return;
             }
-
+            const reset_token = response?.reset_token;
             router.push(
-                `/auth/reset-password?email=${encodeURIComponent(email)}&otp=${otp}`
+                `/auth/reset-password?email=${encodeURIComponent(email)}&reset_token=${encodeURIComponent(reset_token)}`
             );
         } catch (error) {
             console.error(error);
 
-            toast.error(getErrorMessage(error, "Invalid OTP."));
+            toast.error(
+                axios.isAxiosError(error)
+                    ? getBackendMessage(
+                        error.response?.data,
+                        "Invalid OTP."
+                    )
+                    : "Invalid OTP."
+            );
         } finally {
             setLoading(false);
         }
@@ -96,13 +81,22 @@ export default function VerifyOTPForm() {
                 type: source as "register" | "forgot-password",
             });
 
-            toast.success(response?.message || "OTP sent again.");
+            toast.success(
+                getBackendMessage(response, "OTP sent again.")
+            );
 
             setSeconds(10);
         } catch (error) {
             console.error(error);
 
-            toast.error(getErrorMessage(error, "Unable to resend OTP."));
+            toast.error(
+                axios.isAxiosError(error)
+                    ? getBackendMessage(
+                        error.response?.data,
+                        "Unable to resend OTP."
+                    )
+                    : "Unable to resend OTP."
+            );
         }
     };
 

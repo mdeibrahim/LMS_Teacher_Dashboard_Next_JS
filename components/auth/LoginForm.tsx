@@ -1,15 +1,15 @@
 "use client";
 
+import { ArrowRight, BookOpen, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Mail, Lock, ArrowRight } from "lucide-react";
 
 import Input from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { LoginTeacher } from "@/services/auth";
-import { toast } from "sonner";
 import axios from "axios";
+import { useState } from "react";
+import { toast } from "sonner";
 
 
 
@@ -19,6 +19,34 @@ export default function LoginForm() {
     email: "",
     password: "",
   });
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (!axios.isAxiosError(error)) {
+      return fallback;
+    }
+
+    const data = error.response?.data as
+      | {
+        message?: string;
+        detail?: string | string[];
+        error?: string | string[];
+        non_field_errors?: string[];
+        email?: string[];
+        password?: string[];
+      }
+      | undefined;
+
+    const messageCandidates = [
+      data?.message,
+      Array.isArray(data?.detail) ? data?.detail[0] : data?.detail,
+      Array.isArray(data?.error) ? data?.error[0] : data?.error,
+      data?.non_field_errors?.[0],
+      data?.email?.[0],
+      data?.password?.[0],
+    ].filter(Boolean);
+
+    return messageCandidates[0] || fallback;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,15 +91,9 @@ export default function LoginForm() {
 
       console.log("Login successful:", response);
     } catch (error: unknown) {
-
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail?.[0] || "Login failed");
-      } 
-      else {
-        toast.error("Login failed");
-      }
+      toast.error(getErrorMessage(error, "Login failed"));
       console.error("Login failed:", error);
-    
+
     } finally {
       setLoading(false);
     }
@@ -139,12 +161,12 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        <Button 
+        <Button
           type="submit"
           disabled={loading}
           className="w-full h-10 flex items-center justify-center gap-2 text-xs font-semibold bg-blue-500 hover:bg-blue-700 text-white rounded-lg transition-all duration-200"
         >
-          {loading ? "Signing in...": "Sign In"}
+          {loading ? "Signing in..." : "Sign In"}
           <span className="flex text-xs font-semibold items-center justify-center gap-2">
             <ArrowRight size={14} />
           </span>
