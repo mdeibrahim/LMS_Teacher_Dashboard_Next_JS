@@ -10,6 +10,8 @@ export interface Course {
   is_published: boolean;
   created_at: string;
   modules_count: number;
+  category: number | null;
+  subcategory: number | null;
 }
 
 interface CourseResponse {
@@ -32,11 +34,18 @@ export const getCourses = async (): Promise<Course[]> => {
 export const getCourse = async (
   courseId: number
 ): Promise<Course> => {
-  const response = await api.get(
-    `/course-detail/${courseId}/`
-  );
+  const url = `/course-detail/?course_id=${courseId}`;
+  const response = await api.get(url);
 
-  return response.data.data;
+  const payload = response.data;
+
+  const course = payload?.data ?? payload;
+
+  if (!course || course === null) {
+    throw new Error(payload?.message || "Course not found");
+  }
+
+  return course as Course;
 };
 
 
@@ -63,7 +72,7 @@ export const updateCourse = async (
   data: FormData
 ) => {
   const response = await api.patch(
-    `/update-course/?course_id=${courseId}/`,
+    `/update-course/?course_id=${courseId}`,
     data,
     {
       headers: {
