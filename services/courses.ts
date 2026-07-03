@@ -56,3 +56,22 @@ export const createCourse = async (
 
   return response.data;
 };
+
+
+export const updateCourse = async (
+  courseId: number,
+  data: FormData
+) => {
+  const response = await api.patch(
+    `/update-course/?course_id=${courseId}/`,
+    data,
+    {
+      headers: {
+        "Content-Type":
+          "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
