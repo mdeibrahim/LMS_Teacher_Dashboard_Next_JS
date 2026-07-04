@@ -74,8 +74,8 @@ export default function EditCourseForm({
         const course = await getCourse(courseId);
 
         setFormData({
-          category: String(course.category ?? ""),
-          subcategory: String(course.subcategory ?? ""),
+          category: String(course.category?.id || ""),
+          subcategory: String(course.subcategory?.id || ""),
           name: course.name,
           price: String(course.price),
           description: course.description,

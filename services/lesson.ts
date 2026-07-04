@@ -151,6 +151,11 @@ export const getLessons = async (
   return response.data.data ?? [];
 };
 
+export const getAllLessons = async (): Promise<Lesson[]> => {
+  const response = await api.get(`/lesson-list/`);
+  return response.data.data ?? [];
+};
+
 export const getLesson = async (
   moduleId: number,
   lessonId: number
@@ -197,11 +202,10 @@ export const updateLesson = async (
 };
 
 export const deleteLesson = async (
-  moduleId: number,
   lessonId: number
 ) => {
   const response = await api.delete(
-    `/delete-lesson/?module_id=${moduleId}&lesson_id=${lessonId}`
+    `/delete-lesson/?lesson_id=${lessonId}`
   );
 
   return response.data;

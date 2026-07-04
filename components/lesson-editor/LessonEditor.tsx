@@ -443,9 +443,12 @@ export default function LessonEditor({
   };
 
   const openMediaModal = () => {
+    // Save the current text selection so we can link it after creating the media item
+    saveSelection();
     setEditingMediaItem(null);
     setMediaModalOpen(true);
-  };
+  }
+
 
   const openAccordionModal = () => {
     setEditingAccordionItem(null);
@@ -453,10 +456,10 @@ export default function LessonEditor({
   };
 
   const handleMediaSave = (draft: MediaDraft) => {
-    if (!draft.title) {
-      toast.error("Media title is required");
-      return;
-    }
+    // if (!draft.title) {
+    //   toast.error("Media title is required");
+    //   return;
+    // }
 
     const requiresFile =
       draft.contentType === "image" ||
@@ -521,6 +524,15 @@ export default function LessonEditor({
       mediaFilesRef.current.set(nextMediaItem.id, nextFile);
     } else {
       mediaFilesRef.current.delete(nextMediaItem.id);
+    }
+
+    // If a text range was saved before opening the modal, insert a link to the newly created media item
+    if (savedRangeRef.current) {
+      if (restoreSelection()) {
+        insertMediaLink(nextMediaItem);
+      }
+      // Clear the saved range after linking
+      savedRangeRef.current = null;
     }
 
     setMediaModalOpen(false);
@@ -892,7 +904,7 @@ export default function LessonEditor({
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-6">
         <div className="space-y-6">
           
 
@@ -964,7 +976,7 @@ export default function LessonEditor({
                   </p>
                 </div>
 
-                <button
+                {/* <button
                   type="button"
                   onClick={() => {
                     contentRef.current?.focus();
@@ -974,32 +986,57 @@ export default function LessonEditor({
                 >
                   <ShieldCheck size={14} />
                   Capture Selection
-                </button>
+                </button> */}
               </div>
 
-              <EditorToolbar
-                onSaveSelection={saveSelection}
-                onBold={() => executeCommand("bold")}
-                onItalic={() => executeCommand("italic")}
-                onUnderline={() => executeCommand("underline")}
-                onList={() => executeCommand("insertUnorderedList")}
-                onHighlight={handleHighlight}
-                onOpenMedia={() => {
-                  saveSelection();
+                <EditorToolbar
+                  onSaveSelection={saveSelection}
+                  onBold={() => executeCommand("bold")}
+                  onItalic={() => executeCommand("italic")}
+                  onUnderline={() => executeCommand("underline")}
+                  onList={() => executeCommand("insertUnorderedList")}
+                  onListOrdered={() => executeCommand("insertOrderedList")}
+                  onHighlight={handleHighlight}
+                  onFontColor={() => executeCommand("foreColor")}
+                  onHighlightColor={() => executeCommand("hiliteColor")}
+                  onFontSize={() => executeCommand("fontSize")}
+                  onFontFamily={() => executeCommand("fontName")}
+                  onIncreaseFontSize={() => executeCommand("fontSize", "5")}
+                  onDecreaseFontSize={() => executeCommand("fontSize", "2")}
+                  onChangeCase={() => {/* TODO: implement change-case logic */}}
+                  onClearFormatting={() => executeCommand("removeFormat")}
+                  onTextEffects={() => {/* TODO: implement text effects */}}
+                  onStrikethrough={() => executeCommand("strikeThrough")}
+                  onAlignLeft={() => executeCommand("justifyLeft")}
+                  onAlignCenter={() => executeCommand("justifyCenter")}
+                  onAlignRight={() => executeCommand("justifyRight")}
+                  onAlignJustify={() => executeCommand("justifyFull")}
+                  onIndent={() => executeCommand("indent")}
+                  onOutdent={() => executeCommand("outdent")}
+                  onSubscript={() => executeCommand("subscript")}
+                  onSuperscript={() => executeCommand("superscript")}
+                  onQuote={() => executeCommand("formatBlock", "blockquote")}
+                  onLineHeight={() => {/* TODO: implement line height picker */}}
+                  onShading={() => executeCommand("hiliteColor")}
+                  onBorders={() => {/* TODO: implement borders */}}
+                  onSort={() => {/* TODO: implement sort */}}
+                  onToggleFormattingMarks={() => {/* TODO: implement formatting marks toggle */}}
+                  onOpenMedia={() => {
+                    saveSelection();
 
-                  const selectionText =
-                    savedRangeRef.current?.toString().trim() ?? "";
+                    const selectionText =
+                      savedRangeRef.current?.toString().trim() ?? "";
 
-                  if (selectionText) {
-                    setMediaModalOpen(true);
-                  } else {
-                    toast(
-                      "Select some text first if you want to link media"
-                    );
-                    setMediaModalOpen(true);
-                  }
-                }}
-              />
+                    if (selectionText) {
+                      setMediaModalOpen(true);
+                    } else {
+                      toast(
+                        "Select some text first if you want to link media"
+                      );
+                      setMediaModalOpen(true);
+                    }
+                  }}
+                />
 
               <LessonContent
                 ref={contentRef}
@@ -1032,7 +1069,7 @@ export default function LessonEditor({
           </form>
         </div>
 
-        <aside className="space-y-5">
+        {/* <aside className="space-y-5">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -1209,7 +1246,7 @@ export default function LessonEditor({
               )}
             </div>
           </div>
-        </aside>
+        </aside> */}
       </div>
 
       <MediaModal

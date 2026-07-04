@@ -10,8 +10,8 @@ export interface Course {
   is_published: boolean;
   created_at: string;
   modules_count: number;
-  category: number | null;
-  subcategory: number | null;
+  category: string | null;
+  subcategory: string | null;
 }
 
 interface CourseResponse {
@@ -39,7 +39,7 @@ export const getCourse = async (
 
   const payload = response.data;
 
-  const course = payload?.data ?? payload;
+  const course = payload?.data?.[0];
 
   if (!course || course === null) {
     throw new Error(payload?.message || "Course not found");
