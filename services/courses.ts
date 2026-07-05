@@ -1,4 +1,5 @@
 import api from "./api";
+import type { Category, Subcategory } from "./category";
 
 export interface Course {
   id: number;
@@ -10,8 +11,8 @@ export interface Course {
   is_published: boolean;
   created_at: string;
   modules_count: number;
-  category: string | null;
-  subcategory: string | null;
+  category: Category | null;
+  subcategory: Subcategory | null;
 }
 
 interface CourseResponse {

@@ -63,19 +63,56 @@ export default function EditCourseForm({
   }, []);
 
   useEffect(() => {
-    const fetchCourse = async () => {
-      if (!courseId) {
-        setLoadingCourse(false);
-        return;
-      }
+    if (!courseId) {
+      setLoadingCourse(false);
+      return;
+    }
 
+    const fetchCourse = async () => {
       try {
         setLoadingCourse(true);
         const course = await getCourse(courseId);
 
+        // Resolve actual IDs for category and subcategory.
+        // The API may return either IDs or names. We attempt to match both.
+        // Resolve IDs, handling both object and primitive representations.
+        let resolvedCategoryId = "";
+        let resolvedSubcategoryId = "";
+        // Category may be an object {id, name} or a primitive (id or name).
+        if (course.category) {
+          if (typeof course.category === "object") {
+            // @ts-ignore – we know the shape contains id
+            resolvedCategoryId = String((course.category as any).id);
+          } else {
+            const matchedCategory = categories.find(
+              (c) => String(c.id) === String(course.category)
+            );
+            if (matchedCategory) {
+              resolvedCategoryId = String(matchedCategory.id);
+            }
+          }
+        }
+        // Subcategory may be an object or primitive.
+        if (course.subcategory) {
+          if (typeof course.subcategory === "object") {
+            // @ts-ignore
+            resolvedSubcategoryId = String((course.subcategory as any).id);
+          } else if (resolvedCategoryId) {
+            const parentCategory = categories.find((c) => String(c.id) === resolvedCategoryId);
+            if (parentCategory) {
+              const matchedSub = parentCategory.subcategories.find(
+                (sc) => String(sc.id) === String(course.subcategory) 
+              );
+              if (matchedSub) {
+                resolvedSubcategoryId = String(matchedSub.id);
+              }
+            }
+          }
+        }
+
         setFormData({
-          category: String(course.category?.id || ""),
-          subcategory: String(course.subcategory?.id || ""),
+          category: resolvedCategoryId,
+          subcategory: resolvedSubcategoryId,
           name: course.name,
           price: String(course.price),
           description: course.description,
@@ -91,7 +128,7 @@ export default function EditCourseForm({
     };
 
     void fetchCourse();
-  }, [courseId]);
+  }, [courseId, categories]);
 
   const selectedCategory = categories.find(
     (category) => String(category.id) === formData.category
