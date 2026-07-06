@@ -3,6 +3,9 @@ import api from "./api";
 export interface Subcategory {
   id: number;
   name: string;
+  description?: string;
+  category?: number;
+  created_at?: string;
 }
 
 export interface Category {

@@ -23,16 +23,3 @@ export interface MediaDraft {
   fileName: string;
   file: File | null;
 }
-
-export interface AccordionSection {
-  id: number;
-  title: string;
-  content: string;
-  isOpenByDefault: boolean;
-}
-
-export interface AccordionDraft {
-  title: string;
-  content: string;
-  isOpenByDefault: boolean;
-}

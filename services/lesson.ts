@@ -10,6 +10,8 @@ export interface Lesson {
   body_content: string;
   order: number;
   is_published: boolean;
+  module: number;
+  course_id: number;
 }
 
 /* ===========================
@@ -43,18 +45,6 @@ export interface ResourcePayload {
 }
 
 /* ===========================
-   Accordion Section
-=========================== */
-
-export interface AccordionSection {
-  id?: number;
-  title: string;
-  content: string;
-  order: number;
-  is_open_by_default: boolean;
-}
-
-/* ===========================
    Lesson Payload
 =========================== */
 
@@ -64,7 +54,6 @@ export interface LessonPayload {
   order: number;
   is_published: boolean;
   resources: ResourcePayload[];
-  accordion_sections: AccordionSection[];
   mediaFiles: Record<string, File>;
 }
 
@@ -125,12 +114,6 @@ const buildFormData = (
     formData,
     "resources",
     data.resources
-  );
-
-  appendJsonField(
-    formData,
-    "accordion_sections",
-    data.accordion_sections
   );
 
   appendMediaFiles(

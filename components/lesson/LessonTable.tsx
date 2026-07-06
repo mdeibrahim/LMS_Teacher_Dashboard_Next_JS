@@ -45,30 +45,30 @@ export default function LessonTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <div className="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-6 py-4">
         <h2 className="text-lg font-semibold text-slate-800">
           Lessons
         </h2>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200">
-  <table className="min-w-full table-fixed divide-y divide-slate-200">
+      <div className="w-full overflow-x-auto">
+  <table className="w-full table-fixed divide-y divide-slate-200">
     <thead className="bg-slate-50">
       <tr>
-        <th className="w-20 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <th className="w-16 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
           Order
         </th>
 
-        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
           Title
         </th>
 
-        <th className="w-32 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <th className="w-28 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
           Status
         </th>
 
-        <th className="w-56 px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <th className="w-44 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
           Actions
         </th>
       </tr>
@@ -81,18 +81,18 @@ export default function LessonTable({
           className="hover:bg-slate-50 transition"
         >
           {/* Order */}
-          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-600">
+          <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-slate-600">
             {lesson.order}
           </td>
 
           {/* Title */}
-          <td className="px-6 py-4">
-            <div className="max-w-xl">
+          <td className="max-w-0 px-4 py-4">
+            <div className="overflow-hidden">
               <h3 className="truncate font-medium text-slate-800">
                 {lesson.title}
               </h3>
 
-              <p className="mt-1 line-clamp-2 break-words text-sm text-slate-500">
+              <p className="mt-1 truncate text-sm text-slate-500">
                 {lesson.body_content
                   ?.replace(/<[^>]+>/g, "")
                   .replace(/\s+/g, " ")
@@ -102,7 +102,7 @@ export default function LessonTable({
           </td>
 
           {/* Status */}
-          <td className="whitespace-nowrap px-6 py-4">
+          <td className="whitespace-nowrap px-4 py-4">
             <span
               className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
                 lesson.is_published
@@ -117,12 +117,12 @@ export default function LessonTable({
           </td>
 
           {/* Actions */}
-          <td className="whitespace-nowrap px-6 py-4 text-right">
+          <td className="whitespace-nowrap px-4 py-4 text-right">
             <div className="flex justify-end gap-2">
               <Link
-                href={`/manage-content/lessons/add-lesson?courseId=${
-                  courseId ?? ""
-                }&moduleId=${moduleId}&lessonId=${lesson.id}`}
+                href={`/manage-content/lessons/${lesson.id}/edit-lesson?courseId=${
+                  courseId ?? lesson.course_id ?? ""
+                }&moduleId=${moduleId ?? lesson.module ?? ""}`}
                 className="inline-flex items-center gap-2 rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
               >
                 <Pencil size={16} />

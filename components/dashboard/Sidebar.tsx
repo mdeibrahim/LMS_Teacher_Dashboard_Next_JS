@@ -171,7 +171,7 @@ export default function Sidebar({
               <Link
                 href="/manage-content/lessons"
                 onClick={closeSidebar}
-                className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/manage-content/lessons")
+                className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${pathname.startsWith("/manage-content/lessons")
                     ? "bg-blue-50 text-blue-600"
                     : "text-slate-600 hover:bg-slate-50"
                   }`}

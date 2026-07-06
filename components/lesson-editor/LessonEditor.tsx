@@ -28,14 +28,12 @@ import {
   type Module,
 } from "@/services/module";
 
-import AccordionModal from "./accordion/AccordionModal";
 import EditorToolbar from "./EditorToolbar";
 import LessonContent from "./LessonContent";
 import SaveStatus from "./SaveStatus";
 import MediaModal from "./media/MediaModal";
+import MediaList from "./media/MediaList";
 import type {
-  AccordionDraft,
-  AccordionSection,
   MediaDraft,
   MediaItem,
 } from "./types";
@@ -58,14 +56,11 @@ interface LessonEditorProps {
 
 function buildMetadataMarkup({
   mediaItems,
-  accordionSections,
 }: {
   mediaItems: MediaItem[];
-  accordionSections: AccordionSection[];
 }) {
   const payload = {
     mediaItems,
-    accordionSections,
   };
 
   const json = JSON.stringify(payload).replace(
@@ -108,27 +103,23 @@ function extractLessonContent(
     return {
       bodyContent,
       mediaItems: [] as MediaItem[],
-      accordionSections: [] as AccordionSection[],
     };
   }
 
   try {
     const parsed = JSON.parse(metaMatch[1]) as {
       mediaItems?: MediaItem[];
-      accordionSections?: AccordionSection[];
     };
 
     return {
       bodyContent,
       mediaItems: parsed.mediaItems ?? [],
-      accordionSections: parsed.accordionSections ?? [],
     };
   } catch (error) {
     console.warn("Failed to parse lesson metadata", error);
     return {
       bodyContent,
       mediaItems: [] as MediaItem[],
-      accordionSections: [] as AccordionSection[],
     };
   }
 }
@@ -167,15 +158,9 @@ export default function LessonEditor({
   const [bodyContent, setBodyContent] = useState("");
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-  const [accordionSections, setAccordionSections] = useState<
-    AccordionSection[]
-  >([]);
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
-  const [accordionModalOpen, setAccordionModalOpen] = useState(false);
   const [editingMediaItem, setEditingMediaItem] =
     useState<MediaItem | null>(null);
-  const [editingAccordionItem, setEditingAccordionItem] =
-    useState<AccordionSection | null>(null);
   const editingLessonId = normalizeId(initialLessonId);
   const isEditingLesson = isValidId(editingLessonId);
 
@@ -299,12 +284,10 @@ export default function LessonEditor({
         setIsPublished(data.is_published);
         setBodyContent(extracted.bodyContent);
         setMediaItems(extracted.mediaItems);
-        setAccordionSections(extracted.accordionSections);
         nextItemIdRef.current =
           Math.max(
             0,
-            ...extracted.mediaItems.map((item) => item.id),
-            ...extracted.accordionSections.map((section) => section.id)
+            ...extracted.mediaItems.map((item) => item.id)
           ) + 1;
         setStatusTone("idle");
         setStatusMessage("Lesson loaded");
@@ -450,17 +433,8 @@ export default function LessonEditor({
   }
 
 
-  const openAccordionModal = () => {
-    setEditingAccordionItem(null);
-    setAccordionModalOpen(true);
-  };
-
   const handleMediaSave = (draft: MediaDraft) => {
-    // if (!draft.title) {
-    //   toast.error("Media title is required");
-    //   return;
-    // }
-
+    
     const requiresFile =
       draft.contentType === "image" ||
       draft.contentType === "audio" ||
@@ -540,61 +514,15 @@ export default function LessonEditor({
     markDirty();
   };
 
-  const handleAccordionSave = (draft: AccordionDraft) => {
-    if (!draft.title) {
-      toast.error("Section title is required");
-      return;
-    }
-
-    const nextSection: AccordionSection = {
-      id: editingAccordionItem?.id ?? nextItemIdRef.current++,
-      title: draft.title,
-      content: draft.content,
-      isOpenByDefault: draft.isOpenByDefault,
-    };
-
-    setAccordionSections((current) => {
-      const existingIndex = current.findIndex(
-        (item) => item.id === nextSection.id
-      );
-
-      if (existingIndex >= 0) {
-        const next = [...current];
-        next[existingIndex] = nextSection;
-        return next;
-      }
-
-      return [...current, nextSection];
-    });
-
-    setAccordionModalOpen(false);
-    setEditingAccordionItem(null);
-    markDirty();
-  };
-
   const startEditingMedia = (mediaId: number) => {
     const item = mediaItems.find((entry) => entry.id === mediaId) ?? null;
     setEditingMediaItem(item);
     setMediaModalOpen(true);
   };
 
-  const startEditingAccordion = (sectionId: number) => {
-    const item =
-      accordionSections.find((entry) => entry.id === sectionId) ?? null;
-    setEditingAccordionItem(item);
-    setAccordionModalOpen(true);
-  };
-
   const deleteMediaItem = (mediaId: number) => {
     setMediaItems((current) =>
       current.filter((item) => item.id !== mediaId)
-    );
-    markDirty();
-  };
-
-  const deleteAccordionItem = (sectionId: number) => {
-    setAccordionSections((current) =>
-      current.filter((item) => item.id !== sectionId)
     );
     markDirty();
   };
@@ -651,7 +579,6 @@ export default function LessonEditor({
 
       const composedBody = `${bodyHtml}${buildMetadataMarkup({
         mediaItems: mediaItemsWithResourceIds,
-        accordionSections,
       })}`;
       const mediaFiles = Object.fromEntries(
         mediaFilesRef.current
@@ -682,15 +609,6 @@ export default function LessonEditor({
               : undefined,
         })
       );
-      const accordion_sections = accordionSections.map(
-        (section, index) => ({
-          title: section.title,
-          content: section.content,
-          order: index + 1,
-          is_open_by_default: section.isOpenByDefault,
-        })
-      );
-
       console.log("Posting linked media ids:", {
         draftMediaIds: mediaItems.map((item) => item.id),
         draftResourceIds: mediaItemsWithResourceIds.map(
@@ -698,18 +616,25 @@ export default function LessonEditor({
         ),
       });
 
-      const saveResponse = await createLesson(activeModuleId, {
+      const lessonPayload = {
         title: title.trim(),
         body_content: composedBody,
         order,
         is_published: isPublished,
         resources,
-        accordion_sections,
         mediaFiles,
-      });
+      };
 
-      const { lessonId, resourceIds } =
+      const saveResponse = isEditingLesson
+        ? await updateLesson(editingLessonId as number, lessonPayload)
+        : await createLesson(activeModuleId, lessonPayload);
+
+      const { lessonId: newLessonId, resourceIds } =
         extractLessonSaveArtifacts(saveResponse);
+
+      const lessonId = isEditingLesson
+        ? (editingLessonId as number)
+        : newLessonId;
 
       console.log("Backend returned content ids:", {
         lessonId,
@@ -750,16 +675,22 @@ export default function LessonEditor({
 
       setStatusTone("success");
       setStatusMessage("Lesson saved");
-      toast.success("Lesson created successfully");
+      toast.success(
+        isEditingLesson
+          ? "Lesson updated successfully"
+          : "Lesson created successfully"
+      );
 
       setTimeout(() => {
         router.push("/manage-content/modules");
       }, 800);
     } catch (error) {
-      console.error("Failed to create lesson", error);
+      console.error("Failed to save lesson", error);
       setStatusTone("error");
       setStatusMessage("Failed to save lesson");
-      toast.error("Failed to create lesson");
+      toast.error(
+        isEditingLesson ? "Failed to update lesson" : "Failed to create lesson"
+      );
     } finally {
       setSaving(false);
     }
@@ -789,12 +720,16 @@ export default function LessonEditor({
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Add Lesson
+            {isEditingLesson ? "Edit Lesson" : "Add Lesson"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-500">
-            Build a lesson with the same rich-editor workflow from the
-            content studio, then publish it to a selected module.
+            {isEditingLesson
+              ? "Update the lesson content, media, and settings below."
+              : "Build a lesson with the same rich-editor workflow from the content studio, then publish it to a selected module."}
           </p>
+          {lessonLoading && (
+            <p className="mt-1 text-xs text-blue-600">Loading lesson...</p>
+          )}
         </div>
 
         <SaveStatus tone={statusTone} message={statusMessage} />
@@ -904,10 +839,8 @@ export default function LessonEditor({
         </div>
       </div>
 
-      <div className="grid gap-6">
-        <div className="space-y-6">
-          
-
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -975,18 +908,6 @@ export default function LessonEditor({
                     media items, and store sidebar resources in the lesson body.
                   </p>
                 </div>
-
-                {/* <button
-                  type="button"
-                  onClick={() => {
-                    contentRef.current?.focus();
-                    saveSelection();
-                  }}
-                  className="inline-flex items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-                >
-                  <ShieldCheck size={14} />
-                  Capture Selection
-                </button> */}
               </div>
 
                 <EditorToolbar
@@ -1040,7 +961,7 @@ export default function LessonEditor({
 
               <LessonContent
                 ref={contentRef}
-                value=""
+                value={bodyContent}
                 onChange={markDirty}
                 onFocusSelection={saveSelection}
                 onBlurSelection={markDirty}
@@ -1063,190 +984,24 @@ export default function LessonEditor({
                 className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Save size={14} />
-                {saving ? "Saving..." : "Save Lesson"}
+                {saving
+                  ? "Saving..."
+                  : isEditingLesson
+                    ? "Update Lesson"
+                    : "Save Lesson"}
               </button>
             </div>
           </form>
         </div>
 
-        {/* <aside className="space-y-5">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-700">
-                  Media Library
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Link selected text to media cards stored with the lesson.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={openMediaModal}
-                className="inline-flex items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-              >
-                <Plus size={14} />
-                Add
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {mediaItems.length ? (
-                mediaItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h4 className="font-semibold text-slate-800">
-                          {item.title}
-                        </h4>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {item.contentType}
-                          {item.fileName ? ` • ${item.fileName}` : ""}
-                        </p>
-                      </div>
-
-                      <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-blue-700">
-                        {item.contentType}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => startEditingMedia(item.id)}
-                        className="rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-white"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteMediaItem(item.id)}
-                        className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!insertMediaLink(item)) {
-                            toast.error("Select text in the editor first");
-                          } else {
-                            toast.success("Media linked to selected text");
-                          }
-                        }}
-                        className="rounded-full border border-blue-200 px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-50"
-                      >
-                        Link selection
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-                  No media items yet. Add text, image, audio, video, or YouTube
-                  resources to link from the body editor.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-700">
-                  Accordion Sections
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Keep expandable notes and supporting explanations in one
-                  place.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={openAccordionModal}
-                className="inline-flex items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-              >
-                <Plus size={14} />
-                Add
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {accordionSections.length ? (
-                accordionSections.map((section) => (
-                  <div
-                    key={section.id}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h4 className="font-semibold text-slate-800">
-                          {section.title}
-                        </h4>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {section.isOpenByDefault
-                            ? "Open by default"
-                            : "Collapsed by default"}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAccordionSections((current) =>
-                            current.map((item) =>
-                              item.id === section.id
-                                ? {
-                                    ...item,
-                                    isOpenByDefault: !item.isOpenByDefault,
-                                  }
-                                : item
-                            )
-                          )
-                        }
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-white"
-                      >
-                        {section.isOpenByDefault ? (
-                          <ChevronDown size={12} />
-                        ) : (
-                          <ChevronRight size={12} />
-                        )}
-                        Toggle
-                      </button>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => startEditingAccordion(section.id)}
-                        className="rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-white"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteAccordionItem(section.id)}
-                        className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 transition hover:bg-red-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-                  No accordion sections yet. Add collapsible sections to mirror
-                  the richer lesson editor workflow.
-                </div>
-              )}
-            </div>
-          </div>
-        </aside> */}
+        <div className="lg:col-span-1">
+          <MediaList
+            mediaItems={mediaItems}
+            onAddMedia={openMediaModal}
+            onEditMedia={startEditingMedia}
+            onDeleteMedia={deleteMediaItem}
+          />
+        </div>
       </div>
 
       <MediaModal
@@ -1258,17 +1013,6 @@ export default function LessonEditor({
           setEditingMediaItem(null);
         }}
         onSave={handleMediaSave}
-      />
-
-      <AccordionModal
-        key={`accordion-${accordionModalOpen ? "open" : "closed"}-${editingAccordionItem?.id ?? "new"}`}
-        open={accordionModalOpen}
-        item={editingAccordionItem}
-        onClose={() => {
-          setAccordionModalOpen(false);
-          setEditingAccordionItem(null);
-        }}
-        onSave={handleAccordionSave}
       />
     </div>
   );
