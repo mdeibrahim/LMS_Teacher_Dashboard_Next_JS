@@ -140,12 +140,13 @@ export const getAllLessons = async (): Promise<Lesson[]> => {
 };
 
 export const getLesson = async (
-  moduleId: number,
-  lessonId: number
+  lessonId: number,
+  moduleId?: number
 ): Promise<Lesson> => {
-  const response = await api.get(
-    `/lesson-list/?module_id=${moduleId}&lesson_id=${lessonId}`
-  );
+  const url = moduleId 
+    ? `/lesson-list/?module_id=${moduleId}&lesson_id=${lessonId}`
+    : `/lesson-list/?lesson_id=${lessonId}`;
+  const response = await api.get(url);
 
   return response.data.data;
 };

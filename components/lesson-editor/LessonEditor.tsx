@@ -265,13 +265,13 @@ export default function LessonEditor({
     let cancelled = false;
 
     const fetchLesson = async () => {
-      if (!isEditingLesson || !isValidId(activeModuleId)) {
+      if (!isEditingLesson) {
         return;
       }
 
       try {
         setLessonLoading(true);
-        const data = await getLesson(activeModuleId, editingLessonId as number);
+        const data = await getLesson(editingLessonId as number);
 
         if (cancelled) {
           return;
@@ -289,6 +289,14 @@ export default function LessonEditor({
             0,
             ...extracted.mediaItems.map((item) => item.id)
           ) + 1;
+        
+        if (data.course_id && !initialCourseId) {
+          setSelectedCourseId(data.course_id);
+        }
+        if (data.module && !initialModuleId) {
+          setSelectedModuleId(data.module);
+        }
+
         setStatusTone("idle");
         setStatusMessage("Lesson loaded");
       } catch (error) {
@@ -308,7 +316,7 @@ export default function LessonEditor({
     return () => {
       cancelled = true;
     };
-  }, [activeModuleId, editingLessonId, isEditingLesson]);
+  }, [editingLessonId, isEditingLesson, initialCourseId, initialModuleId]);
 
   const markDirty = () => {
     setStatusTone("dirty");
@@ -720,7 +728,7 @@ export default function LessonEditor({
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            {isEditingLesson ? "Edit Lesson" : "Add Lesson"}
+            {isEditingLesson ? "Edit Lesson" : "Edit Lesson"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-500">
             {isEditingLesson

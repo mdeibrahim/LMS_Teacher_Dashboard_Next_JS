@@ -1,7 +1,7 @@
 import LessonEditor from "@/components/lesson-editor/LessonEditor";
 
 type EditLessonPageProps = {
-  params: { lessonId: string };
+  params: Promise<{ lessonId: string }>;
   searchParams?: Promise<{
     courseId?: string;
     moduleId?: string;
@@ -19,9 +19,10 @@ export default async function EditLessonPage({
   searchParams,
 }: EditLessonPageProps) {
   const resolvedSearchParams = await searchParams;
+  const resolvedParams = await params;
   const courseId = toPositiveNumber(resolvedSearchParams?.courseId ?? null);
   const moduleId = toPositiveNumber(resolvedSearchParams?.moduleId ?? null);
-  const lessonId = toPositiveNumber(params.lessonId);
+  const lessonId = toPositiveNumber(resolvedParams.lessonId);
 
   return (
     <LessonEditor
