@@ -631,6 +631,7 @@ export default function LessonEditor({
         is_published: isPublished,
         resources,
         mediaFiles,
+        module_id: activeModuleId ?? undefined,
       };
 
       const saveResponse = isEditingLesson
@@ -690,7 +691,7 @@ export default function LessonEditor({
       );
 
       setTimeout(() => {
-        router.push("/manage-content/modules");
+        router.push("/manage-content/lessons");
       }, 800);
     } catch (error) {
       console.error("Failed to save lesson", error);

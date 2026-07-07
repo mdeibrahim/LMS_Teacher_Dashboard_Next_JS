@@ -55,6 +55,7 @@ export interface LessonPayload {
   is_published: boolean;
   resources: ResourcePayload[];
   mediaFiles: Record<string, File>;
+  module_id?: number;
 }
 
 export type LessonUpdatePayload = Partial<
@@ -90,6 +91,10 @@ const buildFormData = (
   data: LessonPayload | LessonUpdatePayload
 ) => {
   const formData = new FormData();
+
+  if (data.module_id !== undefined && data.module_id !== null) {
+    formData.append("module_id", String(data.module_id));
+  }
 
   if (data.title !== undefined) {
     formData.append("title", data.title);
