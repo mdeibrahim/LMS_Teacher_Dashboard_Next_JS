@@ -720,11 +720,11 @@ export default function LessonEditor({
           <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
             <button
               type="button"
-              onClick={() => router.push("/manage-content/modules")}
+              onClick={() => router.push("/manage-content/lessons")}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 transition hover:border-blue-200 hover:text-blue-700"
             >
               <ArrowLeft size={14} />
-              Back to Modules
+              Back to Lessons
             </button>
           </div>
 

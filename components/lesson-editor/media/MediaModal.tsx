@@ -89,7 +89,7 @@ export default function MediaModal({
         <div className="mt-5 space-y-5">
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
-              Title
+              Title (optional)
             </label>
             <input
               value={title}
@@ -101,7 +101,7 @@ export default function MediaModal({
 
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
-              Content Type
+              Content Type<span className="text-red-500">*</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {types.map((type) => (
@@ -125,7 +125,7 @@ export default function MediaModal({
           {contentType === "text" && (
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
-                Text Content
+                Text Content <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={textContent}

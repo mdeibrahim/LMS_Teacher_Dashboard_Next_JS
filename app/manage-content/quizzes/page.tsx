@@ -5,12 +5,13 @@ import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
 import { getCategories, type Category } from "@/services/category";
-
 import { getCourses, type Course } from "@/services/courses";
 import { deleteQuiz, getQuizzes, type Quiz } from "@/services/quiz";
 
 import QuizFilters from "@/components/quiz/QuizFilters";
 import QuizTable from "@/components/quiz/QuizTable";
+import QuizDeleteModal from "@/components/quiz/DeleteQuizModal";
+import { toast } from "sonner";
 
 export default function QuizzesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -22,6 +23,10 @@ export default function QuizzesPage() {
   const [selectedCourse, setSelectedCourse] = useState<number>();
 
   const [loading, setLoading] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<Quiz | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const selectedCategoryData = categories.find(
     (category) => category.id === selectedCategory
   );
@@ -33,9 +38,7 @@ export default function QuizzesPage() {
     void (async () => {
       try {
         const data = await getCategories();
-
         if (cancelled) return;
-
         startTransition(() => {
           setCategories(data);
         });
@@ -49,63 +52,39 @@ export default function QuizzesPage() {
     };
   }, []);
 
+  // Courses only need to be loaded once a subcategory is picked (mirrors
+  // the lessons page's filter flow).
   useEffect(() => {
     let cancelled = false;
 
+    if (!selectedSubCategory) {
+      setCourses([]);
+      return;
+    }
+
     void (async () => {
       try {
-        setLoading(true);
-
-        const data = await getQuizzes({
-          category: selectedCategory,
-          sub_category: selectedSubCategory,
-          course: selectedCourse,
-        });
-
+        const data = await getCourses();
         if (cancelled) return;
-
-        startTransition(() => {
-          setQuizzes(data);
-          setLoading(false);
-        });
+        setCourses(data);
       } catch (error) {
-        if (!cancelled) {
-          console.error(error);
-
-          startTransition(() => {
-            setLoading(false);
-          });
-        }
+        console.error(error);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [
-    selectedCategory,
-    selectedSubCategory,
-    selectedCourse,
-  ]);
-
-  async function loadCourses() {
-    try {
-      const data = await getCourses();
-
-      setCourses(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  }, [selectedSubCategory]);
 
   async function fetchQuizzes() {
     try {
       setLoading(true);
 
+      // The backend only filters by course_id/module_id/lesson_id, so
+      // category/sub-category only narrow which course the teacher can pick.
       const data = await getQuizzes({
-        category: selectedCategory,
-        sub_category: selectedSubCategory,
-        course: selectedCourse,
+        course_id: selectedCourse,
       });
 
       startTransition(() => {
@@ -114,12 +93,16 @@ export default function QuizzesPage() {
       });
     } catch (error) {
       console.error(error);
-
       startTransition(() => {
         setLoading(false);
       });
     }
   }
+
+  useEffect(() => {
+    void fetchQuizzes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCourse]);
 
   function handleCategoryChange(categoryId?: number) {
     setSelectedCategory(categoryId);
@@ -131,53 +114,45 @@ export default function QuizzesPage() {
   function handleSubCategoryChange(subCategoryId?: number) {
     setSelectedSubCategory(subCategoryId);
     setSelectedCourse(undefined);
-
-    if (subCategoryId) {
-      void loadCourses();
-      return;
+    if (!subCategoryId) {
+      setCourses([]);
     }
-
-    setCourses([]);
   }
 
   function handleCourseChange(courseId?: number) {
     setSelectedCourse(courseId);
   }
 
-  async function handleDelete(id: number) {
-    const confirmed = window.confirm(
-      "Delete this quiz?"
-    );
+  function handleDeleteRequest(quiz: Quiz) {
+    setDeleteTarget(quiz);
+  }
 
-    if (!confirmed) return;
+  async function confirmDelete() {
+    if (!deleteTarget) return;
 
     try {
-      await deleteQuiz(id);
-
+      setDeleting(true);
+      await deleteQuiz(deleteTarget.id);
+      toast.success(`"${deleteTarget.title}" deleted successfully`);
+      setDeleteTarget(null);
       void fetchQuizzes();
     } catch (error) {
       console.error(error);
+      toast.error("Failed to delete quiz");
+    } finally {
+      setDeleting(false);
     }
   }
 
   return (
     <div className="space-y-6">
-
       {/* Header */}
-
       <div className="flex items-center justify-between">
-
         <div>
-
-          <h1 className="text-3xl font-bold">
-            Quizzes
-          </h1>
-
+          <h1 className="text-3xl font-bold">Quizzes</h1>
           <p className="mt-2 text-sm text-slate-500">
-            Manage quizzes by category,
-            sub category and course.
+            Manage quizzes by category, sub category and course.
           </p>
-
         </div>
 
         <Link
@@ -185,14 +160,11 @@ export default function QuizzesPage() {
           className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-white transition hover:bg-blue-700"
         >
           <Plus size={18} />
-
           Add Quiz
         </Link>
-
       </div>
 
       {/* Filters */}
-
       <QuizFilters
         categories={categories}
         subCategories={subCategories}
@@ -206,13 +178,22 @@ export default function QuizzesPage() {
       />
 
       {/* Table */}
-
       <QuizTable
         quizzes={quizzes}
         loading={loading}
-        onDelete={handleDelete}
+        onDelete={handleDeleteRequest}
       />
 
+      <QuizDeleteModal
+        open={deleteTarget !== null}
+        quizTitle={deleteTarget?.title}
+        deleting={deleting}
+        onCancel={() => {
+          if (deleting) return;
+          setDeleteTarget(null);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

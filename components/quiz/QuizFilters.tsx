@@ -1,19 +1,13 @@
 "use client";
 
-import {
-  FolderTree,
-  GraduationCap,
-  Layers3,
-  Search,
-  X,
-} from "lucide-react";
+import { FolderTree, GraduationCap, Search } from "lucide-react";
 
-import type { Category } from "@/services/category";
+import { type Category, type Subcategory } from "@/services/category";
 import type { Course } from "@/services/courses";
 
-interface QuizFiltersProps {
+interface Props {
   categories: Category[];
-  subCategories: Category["subcategories"];
+  subCategories: Subcategory[];
   courses: Course[];
 
   selectedCategory?: number;
@@ -29,60 +23,42 @@ export default function QuizFilters({
   categories,
   subCategories,
   courses,
+
   selectedCategory,
   selectedSubCategory,
   selectedCourse,
+
   onCategoryChange,
   onSubCategoryChange,
   onCourseChange,
-}: QuizFiltersProps) {
-  const clearFilters = () => {
-    onCategoryChange(undefined);
-    onSubCategoryChange(undefined);
-    onCourseChange(undefined);
-  };
-
+}: Props) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Search className="text-blue-600" size={18} />
-
-          <h2 className="text-lg font-semibold text-slate-800">
-            Filter Quizzes
-          </h2>
-        </div>
-
-        <button
-          type="button"
-          onClick={clearFilters}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
-        >
-          <X size={16} />
-
-          Clear
-        </button>
+      <div className="mb-6 flex items-center gap-2">
+        <Search className="text-blue-600" size={18} />
+        <h2 className="text-lg font-semibold text-slate-800">
+          Filter Quizzes
+        </h2>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-3">
+        {/* Category */}
         <div>
           <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-600">
             <FolderTree size={16} />
-
             Category
           </label>
 
           <select
             value={selectedCategory ?? ""}
-            onChange={(event) =>
+            onChange={(e) =>
               onCategoryChange(
-                event.target.value ? Number(event.target.value) : undefined
+                e.target.value ? Number(e.target.value) : undefined
               )
             }
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-600"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500"
           >
             <option value="">Select Category</option>
-
             {categories.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -91,25 +67,24 @@ export default function QuizFilters({
           </select>
         </div>
 
+        {/* Sub Category */}
         <div>
           <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-600">
-            <Layers3 size={16} />
-
+            <FolderTree size={16} />
             Sub Category
           </label>
 
           <select
             value={selectedSubCategory ?? ""}
             disabled={!selectedCategory}
-            onChange={(event) =>
+            onChange={(e) =>
               onSubCategoryChange(
-                event.target.value ? Number(event.target.value) : undefined
+                e.target.value ? Number(e.target.value) : undefined
               )
             }
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-600 disabled:bg-slate-100"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 disabled:bg-slate-100"
           >
             <option value="">Select Sub Category</option>
-
             {subCategories.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -118,25 +93,24 @@ export default function QuizFilters({
           </select>
         </div>
 
+        {/* Course */}
         <div>
           <label className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-600">
             <GraduationCap size={16} />
-
             Course
           </label>
 
           <select
             value={selectedCourse ?? ""}
             disabled={!selectedSubCategory}
-            onChange={(event) =>
+            onChange={(e) =>
               onCourseChange(
-                event.target.value ? Number(event.target.value) : undefined
+                e.target.value ? Number(e.target.value) : undefined
               )
             }
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-600 disabled:bg-slate-100"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 disabled:bg-slate-100"
           >
             <option value="">Select Course</option>
-
             {courses.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}

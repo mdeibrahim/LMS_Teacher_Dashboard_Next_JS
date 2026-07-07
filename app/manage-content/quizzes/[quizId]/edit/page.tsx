@@ -1,31 +1,28 @@
-"use client";
+import QuizEditor from "@/components/quiz/QuizEditor";
 
-import { useState } from "react";
+type EditQuizPageProps = {
+  params: { quizId: string };
+};
 
-import QuestionList, {
-    type QuizQuestion,
-} from "@/components/quiz/QuestionList";
-import QuizInfoCard from "@/components/quiz/QuizInfoCard";
+function toPositiveNumber(value: string | null | undefined) {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
 
-export default function EditQuizPage() {
-    const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+export default function EditQuizPage({ params }: EditQuizPageProps) {
+  const quizId = toPositiveNumber(params.quizId);
 
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold">Edit Quiz</h1>
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Edit Quiz</h1>
+        <p className="mt-2 text-slate-500">
+          Update quiz details and questions.
+        </p>
+      </div>
 
-                <p className="mt-2 text-slate-500">
-                    Update quiz details and questions.
-                </p>
-            </div>
-
-            <QuizInfoCard />
-
-            <QuestionList
-                questions={questions}
-                setQuestions={setQuestions}
-            />
-        </div>
-    );
+      <QuizEditor initialQuizId={quizId} />
+    </div>
+  );
 }
