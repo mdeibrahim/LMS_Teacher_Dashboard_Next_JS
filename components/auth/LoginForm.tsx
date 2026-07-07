@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import { Button } from "@/components/ui/button";
 import { LoginTeacher } from "@/services/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ export default function LoginForm() {
     email: "",
     password: "",
   });
+  const { refreshProfile } = useAuth();
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (!axios.isAxiosError(error)) {
@@ -82,6 +84,9 @@ export default function LoginForm() {
         }
       }
 
+      // Profile এখনই load করো, refresh লাগবে না
+      await refreshProfile();
+
       toast.success(
         response.message || "Login successful"
       );
@@ -102,6 +107,16 @@ export default function LoginForm() {
 
 
   return (
+    <>
+      {/* Full-screen loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-14 w-14 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+            <p className="text-sm font-semibold text-slate-600 tracking-wide">Signing in...</p>
+          </div>
+        </div>
+      )}
     <div className="w-full max-w-md space-y-8 rounded-2xl border bg-white p-8 shadow-sm">
       <div className="flex flex-col items-center">
         <BookOpen className="mt-2 mb-2 text-blue-600" size={28} />
@@ -213,5 +228,6 @@ export default function LoginForm() {
         </Link>
       </p>
     </div>
+    </>
   );
 }

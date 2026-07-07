@@ -53,6 +53,7 @@ export default function RegisterForm() {
 
 
     try {
+      setLoading(true);
       const response =
         await RegisterTeacher(formData);
 
@@ -92,7 +93,17 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="bg-white w-full max-w-xl rounded-2xl shadow-xl p-10">
+    <>
+      {/* Full-screen loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-14 w-14 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+            <p className="text-sm font-semibold text-slate-600 tracking-wide">Creating your account...</p>
+          </div>
+        </div>
+      )}
+      <div className="bg-white w-full max-w-xl rounded-2xl shadow-xl p-10">
       <div>
         <h4 className="text-2xl font-bold text-blue-600">
           Create your Account
@@ -260,8 +271,7 @@ export default function RegisterForm() {
           Log In
         </Link>
       </p>
-    </div>
-
-
+      </div>
+    </>
   );
 }
