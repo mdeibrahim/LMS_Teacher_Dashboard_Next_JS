@@ -222,7 +222,7 @@ export default function ModulesPage() {
 
                 <div className="flex items-center gap-90">
                   <Link
-                    href={`/manage-content/courses/${course.id}/add-module`}
+                    href={`/manage-content/modules/add-module?courseId=${course.id}`}
                     className="mt-3 flex cursor-pointer items-center gap-2 rounded-2xl border border-dashed border-slate-300 py-2 p-3 text-sm font-medium text-slate-500 transition hover:border-blue-700 hover:text-blue-600"
                   >
                     <Plus size={14} />
@@ -377,7 +377,7 @@ export default function ModulesPage() {
                   ))}
 
                   <Link
-                    href={`/manage-content/courses/${course.id}/add-module`}
+                    href={`/manage-content/modules/add-module?courseId=${course.id}`}
                     className="w-full p-2 border border-dashed border-slate-300 rounded-2xl py-2 text-slate-500 hover:border-blue-500 hover:text-blue-600 transition font-medium text-sm mt-3">
                     + Add New Module
                   </Link>

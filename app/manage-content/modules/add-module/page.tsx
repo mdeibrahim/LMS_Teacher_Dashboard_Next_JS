@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -26,12 +26,10 @@ type AddModuleFormData = {
 
 export default function AddModulePage() {
   const router = useRouter();
-  const params = useParams();
+  const searchParams = useSearchParams();
 
-  const courseIdValue = params?.courseId as string | string[] | undefined;
-  const courseId = Number(
-    Array.isArray(courseIdValue) ? courseIdValue[0] : courseIdValue
-  );
+  const courseIdParam = searchParams.get("courseId");
+  const courseId = courseIdParam ? Number(courseIdParam) : NaN;
 
   const [course, setCourse] = useState<Course | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
