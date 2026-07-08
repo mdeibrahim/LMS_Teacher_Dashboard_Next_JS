@@ -14,11 +14,16 @@ interface QuestionModalProps {
 
 const emptyDraft = {
   question: "",
+  image: null as File | string | null,
   option_a: "",
   option_b: "",
   option_c: "",
   option_d: "",
   correct_option: "A" as CorrectOption,
+  explanation: "",
+  explanation_image: null as File | string | null,
+  explanation_note: "",
+  explanation_video_url: "",
 };
 
 const optionFields: {
@@ -48,11 +53,16 @@ export default function QuestionModal({
       question
         ? {
             question: question.question,
+            image: question.image || null,
             option_a: question.option_a,
             option_b: question.option_b,
             option_c: question.option_c,
             option_d: question.option_d,
             correct_option: question.correct_option,
+            explanation: question.explanation || "",
+            explanation_image: question.explanation_image || null,
+            explanation_note: question.explanation_note || "",
+            explanation_video_url: question.explanation_video_url || "",
           }
         : emptyDraft
     );
@@ -80,11 +90,16 @@ export default function QuestionModal({
     onSave({
       ...question,
       question: draft.question.trim(),
+      image: draft.image,
       option_a: draft.option_a.trim(),
       option_b: draft.option_b.trim(),
       option_c: draft.option_c.trim(),
       option_d: draft.option_d.trim(),
       correct_option: draft.correct_option,
+      explanation: draft.explanation.trim(),
+      explanation_image: draft.explanation_image,
+      explanation_note: draft.explanation_note.trim(),
+      explanation_video_url: draft.explanation_video_url.trim(),
     });
   };
 
@@ -125,6 +140,24 @@ export default function QuestionModal({
               placeholder="Type the question..."
               className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Question Image (Optional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setDraft((prev) => ({ ...prev, image: file }));
+              }}
+              className="w-full text-sm text-slate-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {typeof draft.image === "string" && draft.image && (
+              <p className="mt-1 text-xs text-emerald-600">Current image uploaded.</p>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -173,6 +206,73 @@ export default function QuestionModal({
                 />
               </div>
             ))}
+          </div>
+
+          <div className="border-t border-slate-200 pt-5 space-y-5">
+            <h4 className="text-md font-medium text-slate-800">Explanation & Resources</h4>
+            
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Explanation (Optional)
+              </label>
+              <textarea
+                value={draft.explanation}
+                onChange={(event) =>
+                  setDraft((prev) => ({ ...prev, explanation: event.target.value }))
+                }
+                rows={3}
+                placeholder="Explain why the answer is correct..."
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Explanation Image (Optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setDraft((prev) => ({ ...prev, explanation_image: file }));
+                }}
+                className="w-full text-sm text-slate-500 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+              />
+              {typeof draft.explanation_image === "string" && draft.explanation_image && (
+                <p className="mt-1 text-xs text-emerald-600">Current explanation image uploaded.</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Explanation Note (Optional)
+              </label>
+              <textarea
+                value={draft.explanation_note}
+                onChange={(event) =>
+                  setDraft((prev) => ({ ...prev, explanation_note: event.target.value }))
+                }
+                rows={2}
+                placeholder="Any additional notes..."
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Explanation Video URL (YouTube, Optional)
+              </label>
+              <input
+                type="text"
+                value={draft.explanation_video_url}
+                onChange={(event) =>
+                  setDraft((prev) => ({ ...prev, explanation_video_url: event.target.value }))
+                }
+                placeholder="https://youtube.com/..."
+                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
 
           {error && (

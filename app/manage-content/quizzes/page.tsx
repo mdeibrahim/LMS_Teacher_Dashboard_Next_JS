@@ -91,8 +91,15 @@ export default function QuizzesPage() {
         setQuizzes(data);
         setLoading(false);
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
+
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message ?? "Failed to load quizzes. Please try again.";
+
+      toast.error(message);
+
       startTransition(() => {
         setLoading(false);
       });

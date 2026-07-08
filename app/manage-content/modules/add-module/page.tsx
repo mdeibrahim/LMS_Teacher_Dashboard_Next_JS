@@ -7,6 +7,7 @@ import {
   type FormEvent,
   useEffect,
   useState,
+  Suspense,
 } from "react";
 import { toast } from "sonner";
 
@@ -24,7 +25,7 @@ type AddModuleFormData = {
   is_published: boolean;
 };
 
-export default function AddModulePage() {
+function AddModuleContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -265,5 +266,13 @@ export default function AddModulePage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function AddModulePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddModuleContent />
+    </Suspense>
   );
 }

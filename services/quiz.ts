@@ -15,6 +15,11 @@ export interface QuizQuestion {
   option_d: string;
   correct_option: CorrectOption;
   order?: number;
+  image?: File | string | null;
+  explanation?: string;
+  explanation_image?: File | string | null;
+  explanation_note?: string;
+  explanation_video_url?: string;
 }
 
 /* ===========================
@@ -56,6 +61,49 @@ export interface QuizPayload {
 }
 
 export type QuizUpdatePayload = Partial<QuizPayload>;
+
+const buildQuizFormData = (data: QuizPayload | QuizUpdatePayload) => {
+  const formData = new FormData();
+
+  // Append root fields
+  if (data.title !== undefined) formData.append("title", data.title);
+  if (data.pass_score !== undefined)
+    formData.append("pass_score", String(data.pass_score));
+  if (data.order !== undefined) formData.append("order", String(data.order));
+  if (data.is_active !== undefined)
+    formData.append("is_active", String(data.is_active));
+  if (data.module !== undefined)
+    formData.append("module", data.module ? String(data.module) : "");
+  if (data.lesson !== undefined)
+    formData.append("lesson", data.lesson ? String(data.lesson) : "");
+
+  // Append questions JSON and files
+  if (data.questions !== undefined) {
+    const serializedQuestions = data.questions.map((q, index) => {
+      const qData: any = { ...q };
+
+      if (q.image instanceof File) {
+        const key = `question_image_${index}`;
+        formData.append(key, q.image);
+        qData.image_key = key;
+        delete qData.image;
+      }
+
+      if (q.explanation_image instanceof File) {
+        const key = `question_explanation_image_${index}`;
+        formData.append(key, q.explanation_image);
+        qData.explanation_image_key = key;
+        delete qData.explanation_image;
+      }
+
+      return qData;
+    });
+
+    formData.append("questions", JSON.stringify(serializedQuestions));
+  }
+
+  return formData;
+};
 
 type ApiEnvelope<T> = {
   message?: string;
@@ -103,7 +151,9 @@ export const getQuiz = async (quizId: number): Promise<Quiz> => {
 };
 
 export const createQuiz = async (data: QuizPayload) => {
-  const response = await api.post("/create-quiz/", data);
+  const response = await api.post("/create-quiz/", buildQuizFormData(data), {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return response.data;
 };
 
@@ -113,7 +163,10 @@ export const updateQuiz = async (
 ) => {
   const response = await api.patch(
     `/update-quiz/?quiz_id=${quizId}`,
-    data
+    buildQuizFormData(data),
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
   );
 
   return response.data;

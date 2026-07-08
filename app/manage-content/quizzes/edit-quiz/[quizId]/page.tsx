@@ -1,7 +1,7 @@
 import QuizEditor from "@/components/quiz/QuizEditor";
 
 type EditQuizPageProps = {
-  params: { quizId: string };
+  params: Promise<{ quizId: string }>;
 };
 
 function toPositiveNumber(value: string | null | undefined) {
@@ -10,8 +10,9 @@ function toPositiveNumber(value: string | null | undefined) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
-export default function EditQuizPage({ params }: EditQuizPageProps) {
-  const quizId = toPositiveNumber(params.quizId);
+export default async function EditQuizPage({ params }: EditQuizPageProps) {
+  const { quizId } = await params;
+  const quizIdNum = toPositiveNumber(quizId);
 
   return (
     <div className="space-y-6">
@@ -22,7 +23,7 @@ export default function EditQuizPage({ params }: EditQuizPageProps) {
         </p>
       </div>
 
-      <QuizEditor initialQuizId={quizId} />
+      <QuizEditor initialQuizId={quizIdNum} />
     </div>
   );
 }

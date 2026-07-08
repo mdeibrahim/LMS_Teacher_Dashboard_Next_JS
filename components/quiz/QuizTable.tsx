@@ -101,11 +101,10 @@ export default function QuizTable({ quizzes, loading, onDelete }: Props) {
 
                 <td className="whitespace-nowrap px-6 py-4">
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                      quiz.is_active
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${quiz.is_active
                         ? "bg-green-100 text-green-700"
                         : "bg-slate-100 text-slate-500"
-                    }`}
+                      }`}
                   >
                     {quiz.is_active ? "Active" : "Inactive"}
                   </span>
