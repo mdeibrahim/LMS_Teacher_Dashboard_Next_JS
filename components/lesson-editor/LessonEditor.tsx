@@ -29,7 +29,7 @@ import {
 } from "@/services/module";
 
 import EditorToolbar from "./EditorToolbar";
-import LessonContent from "./LessonContent";
+import LessonContent, { lessonContentMarksStyles } from "./LessonContent";
 import SaveStatus from "./SaveStatus";
 import MediaModal from "./media/MediaModal";
 import MediaList from "./media/MediaList";
@@ -159,6 +159,7 @@ export default function LessonEditor({
 
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
+  const [formattingMarksVisible, setFormattingMarksVisible] = useState(false);
   const [editingMediaItem, setEditingMediaItem] =
     useState<MediaItem | null>(null);
   const editingLessonId = normalizeId(initialLessonId);
@@ -289,7 +290,7 @@ export default function LessonEditor({
             0,
             ...extracted.mediaItems.map((item) => item.id)
           ) + 1;
-        
+
         if (data.course_id && !initialCourseId) {
           setSelectedCourseId(data.course_id);
         }
@@ -365,6 +366,23 @@ export default function LessonEditor({
     }
   };
 
+  // Same as executeCommand, but re-applies the saved selection first. Needed
+  // for anything that opens a dropdown menu before the value is picked,
+  // since opening the menu can steal focus away from the editable region.
+  const applyCommandWithSelection = (command: string, value?: string) => {
+    if (!contentRef.current) {
+      return;
+    }
+
+    restoreSelection();
+    contentRef.current.focus();
+
+    const result = document.execCommand(command, false, value);
+    if (result) {
+      markDirty();
+    }
+  };
+
   const handleHighlight = () => {
     if (!restoreSelection()) {
       return;
@@ -377,6 +395,275 @@ export default function LessonEditor({
     if (highlighted) {
       markDirty();
     }
+  };
+
+  const handleFontFamily = (font: string) => {
+    applyCommandWithSelection("fontName", font);
+  };
+
+  const handleFontSize = (execValue: string) => {
+    applyCommandWithSelection("fontSize", execValue);
+  };
+
+  const handleFontColor = (color: string) => {
+    applyCommandWithSelection("foreColor", color);
+  };
+
+  const handleHighlightColor = (color: string) => {
+    if (!contentRef.current) {
+      return;
+    }
+
+    restoreSelection();
+    contentRef.current.focus();
+
+    const applied =
+      document.execCommand("hiliteColor", false, color) ||
+      document.execCommand("backColor", false, color);
+
+    if (applied) {
+      markDirty();
+    }
+  };
+
+  function transformCase(
+    text: string,
+    mode: "upper" | "lower" | "title" | "sentence"
+  ) {
+    switch (mode) {
+      case "upper":
+        return text.toUpperCase();
+      case "lower":
+        return text.toLowerCase();
+      case "title":
+        return text.replace(
+          /\w\S*/g,
+          (word) => word[0].toUpperCase() + word.slice(1).toLowerCase()
+        );
+      case "sentence": {
+        const lower = text.toLowerCase();
+        return lower.replace(
+          /(^\s*[a-z]|[.!?]\s+[a-z])/g,
+          (match) => match.toUpperCase()
+        );
+      }
+      default:
+        return text;
+    }
+  }
+
+  const handleChangeCase = (
+    mode: "upper" | "lower" | "title" | "sentence"
+  ) => {
+    if (!restoreSelection()) {
+      toast("Select some text first");
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      toast("Select some text first");
+      return;
+    }
+
+    const text = selection.toString();
+    if (!text) {
+      return;
+    }
+
+    contentRef.current?.focus();
+    const transformed = transformCase(text, mode);
+    const applied = document.execCommand("insertText", false, transformed);
+
+    if (applied) {
+      markDirty();
+    }
+  };
+
+  const handleTextEffects = (mode: "shadow" | "outline" | "none") => {
+    if (!restoreSelection()) {
+      toast("Select some text first");
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      toast("Select some text first");
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const span = document.createElement("span");
+
+    if (mode === "shadow") {
+      span.style.textShadow = "1px 1px 2px rgba(15, 23, 42, 0.45)";
+    } else if (mode === "outline") {
+      span.style.setProperty("-webkit-text-stroke", "0.6px #0f172a");
+    } else {
+      span.style.textShadow = "none";
+      span.style.setProperty("-webkit-text-stroke", "0px");
+    }
+
+    const contents = range.extractContents();
+    span.appendChild(contents);
+    range.insertNode(span);
+    selection.removeAllRanges();
+    markDirty();
+  };
+
+  const BLOCK_TAGS = [
+    "P",
+    "DIV",
+    "LI",
+    "BLOCKQUOTE",
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+  ];
+
+  function findBlockAncestor(range: Range): HTMLElement | null {
+    let node: Node | null = range.commonAncestorContainer;
+    if (node.nodeType === Node.TEXT_NODE) {
+      node = node.parentElement;
+    }
+
+    let element = node as HTMLElement | null;
+    while (
+      element &&
+      element !== contentRef.current &&
+      !BLOCK_TAGS.includes(element.tagName)
+    ) {
+      element = element.parentElement;
+    }
+
+    return element && element !== contentRef.current ? element : null;
+  }
+
+  const handleLineHeight = (value: string) => {
+    if (!restoreSelection()) {
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const target = findBlockAncestor(range) ?? contentRef.current;
+
+    if (target) {
+      target.style.lineHeight = value;
+      markDirty();
+    }
+  };
+
+  const handleShading = (color: string) => {
+    if (!restoreSelection()) {
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const target = findBlockAncestor(range);
+
+    if (!target) {
+      toast("Click inside a paragraph first");
+      return;
+    }
+
+    const isClear = color === "transparent";
+    target.style.backgroundColor = isClear ? "" : color;
+    target.style.borderRadius = isClear ? "" : "6px";
+    target.style.padding = isClear ? "" : "4px 8px";
+    markDirty();
+  };
+
+  const handleBorders = (style: "all" | "bottom" | "box" | "none") => {
+    if (!restoreSelection()) {
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const target = findBlockAncestor(range);
+
+    if (!target) {
+      toast("Click inside a paragraph first");
+      return;
+    }
+
+    target.style.border = "";
+    target.style.borderBottom = "";
+    target.style.padding = style === "none" ? "" : "6px 10px";
+
+    if (style === "box") {
+      target.style.border = "1px solid #cbd5e1";
+    } else if (style === "bottom") {
+      target.style.borderBottom = "1px solid #cbd5e1";
+    } else if (style === "all") {
+      target.style.border = "2px double #94a3b8";
+    }
+
+    markDirty();
+  };
+
+  const handleSort = () => {
+    if (!restoreSelection()) {
+      toast("Click inside a list to sort it");
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    let node: Node | null = range.commonAncestorContainer;
+    if (node.nodeType === Node.TEXT_NODE) {
+      node = node.parentElement;
+    }
+
+    let element = node as HTMLElement | null;
+    while (
+      element &&
+      element !== contentRef.current &&
+      element.tagName !== "UL" &&
+      element.tagName !== "OL"
+    ) {
+      element = element.parentElement;
+    }
+
+    if (element && (element.tagName === "UL" || element.tagName === "OL")) {
+      const items = Array.from(element.children) as HTMLElement[];
+      items
+        .sort((a, b) =>
+          (a.textContent ?? "")
+            .trim()
+            .localeCompare((b.textContent ?? "").trim())
+        )
+        .forEach((item) => element!.appendChild(item));
+      markDirty();
+      return;
+    }
+
+    toast("Sort works inside a bulleted or numbered list");
+  };
+
+  const handleToggleFormattingMarks = () => {
+    setFormattingMarksVisible((visible) => !visible);
   };
 
   const insertMediaLink = (item: MediaItem) => {
@@ -442,7 +729,7 @@ export default function LessonEditor({
 
 
   const handleMediaSave = (draft: MediaDraft) => {
-    
+
     const requiresFile =
       draft.contentType === "image" ||
       draft.contentType === "audio" ||
@@ -611,8 +898,8 @@ export default function LessonEditor({
           is_published: true,
           file_key:
             item.contentType === "image" ||
-            item.contentType === "audio" ||
-            item.contentType === "video"
+              item.contentType === "audio" ||
+              item.contentType === "video"
               ? String(item.id)
               : undefined,
         })
@@ -919,55 +1206,57 @@ export default function LessonEditor({
                 </div>
               </div>
 
-                <EditorToolbar
-                  onSaveSelection={saveSelection}
-                  onBold={() => executeCommand("bold")}
-                  onItalic={() => executeCommand("italic")}
-                  onUnderline={() => executeCommand("underline")}
-                  onList={() => executeCommand("insertUnorderedList")}
-                  onListOrdered={() => executeCommand("insertOrderedList")}
-                  onHighlight={handleHighlight}
-                  onFontColor={() => executeCommand("foreColor")}
-                  onHighlightColor={() => executeCommand("hiliteColor")}
-                  onFontSize={() => executeCommand("fontSize")}
-                  onFontFamily={() => executeCommand("fontName")}
-                  onIncreaseFontSize={() => executeCommand("fontSize", "5")}
-                  onDecreaseFontSize={() => executeCommand("fontSize", "2")}
-                  onChangeCase={() => {/* TODO: implement change-case logic */}}
-                  onClearFormatting={() => executeCommand("removeFormat")}
-                  onTextEffects={() => {/* TODO: implement text effects */}}
-                  onStrikethrough={() => executeCommand("strikeThrough")}
-                  onAlignLeft={() => executeCommand("justifyLeft")}
-                  onAlignCenter={() => executeCommand("justifyCenter")}
-                  onAlignRight={() => executeCommand("justifyRight")}
-                  onAlignJustify={() => executeCommand("justifyFull")}
-                  onIndent={() => executeCommand("indent")}
-                  onOutdent={() => executeCommand("outdent")}
-                  onSubscript={() => executeCommand("subscript")}
-                  onSuperscript={() => executeCommand("superscript")}
-                  onQuote={() => executeCommand("formatBlock", "blockquote")}
-                  onLineHeight={() => {/* TODO: implement line height picker */}}
-                  onShading={() => executeCommand("hiliteColor")}
-                  onBorders={() => {/* TODO: implement borders */}}
-                  onSort={() => {/* TODO: implement sort */}}
-                  onToggleFormattingMarks={() => {/* TODO: implement formatting marks toggle */}}
-                  onOpenMedia={() => {
-                    saveSelection();
+              <EditorToolbar
+                onSaveSelection={saveSelection}
+                onBold={() => executeCommand("bold")}
+                onItalic={() => executeCommand("italic")}
+                onUnderline={() => executeCommand("underline")}
+                onList={() => executeCommand("insertUnorderedList")}
+                onListOrdered={() => executeCommand("insertOrderedList")}
+                onHighlight={handleHighlight}
+                onFontColor={handleFontColor}
+                onHighlightColor={handleHighlightColor}
+                onFontSize={handleFontSize}
+                onFontFamily={handleFontFamily}
+                onIncreaseFontSize={() => executeCommand("fontSize", "5")}
+                onDecreaseFontSize={() => executeCommand("fontSize", "2")}
+                onChangeCase={handleChangeCase}
+                onClearFormatting={() => executeCommand("removeFormat")}
+                onTextEffects={handleTextEffects}
+                onStrikethrough={() => executeCommand("strikeThrough")}
+                onAlignLeft={() => executeCommand("justifyLeft")}
+                onAlignCenter={() => executeCommand("justifyCenter")}
+                onAlignRight={() => executeCommand("justifyRight")}
+                onAlignJustify={() => executeCommand("justifyFull")}
+                onIndent={() => executeCommand("indent")}
+                onOutdent={() => executeCommand("outdent")}
+                onSubscript={() => executeCommand("subscript")}
+                onSuperscript={() => executeCommand("superscript")}
+                onQuote={() => executeCommand("formatBlock", "blockquote")}
+                onLineHeight={handleLineHeight}
+                onShading={handleShading}
+                onBorders={handleBorders}
+                onSort={handleSort}
+                onToggleFormattingMarks={handleToggleFormattingMarks}
+                formattingMarksVisible={formattingMarksVisible}
+                onOpenMedia={() => {
+                  saveSelection();
 
-                    const selectionText =
-                      savedRangeRef.current?.toString().trim() ?? "";
+                  const selectionText =
+                    savedRangeRef.current?.toString().trim() ?? "";
 
-                    if (selectionText) {
-                      setMediaModalOpen(true);
-                    } else {
-                      toast(
-                        "Select some text first if you want to link media"
-                      );
-                      setMediaModalOpen(true);
-                    }
-                  }}
-                />
+                  if (selectionText) {
+                    setMediaModalOpen(true);
+                  } else {
+                    toast(
+                      "Select some text first if you want to link media"
+                    );
+                    setMediaModalOpen(true);
+                  }
+                }}
+              />
 
+              <style>{lessonContentMarksStyles}</style>
               <LessonContent
                 ref={contentRef}
                 value={bodyContent}
@@ -975,6 +1264,7 @@ export default function LessonEditor({
                 onFocusSelection={saveSelection}
                 onBlurSelection={markDirty}
                 onClick={handleContentClick}
+                showFormattingMarks={formattingMarksVisible}
               />
             </div>
 
