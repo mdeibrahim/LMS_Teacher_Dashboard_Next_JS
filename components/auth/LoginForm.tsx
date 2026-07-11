@@ -10,6 +10,10 @@ import { LoginTeacher } from "@/services/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { useState } from "react";
+import { FirebaseGoogleLogin } from "@/services/auth";
+import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithPopup } from "firebase/auth";
+
 import { toast } from "sonner";
 
 
@@ -60,6 +64,40 @@ export default function LoginForm() {
 
 
   const router = useRouter();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      
+      const response = await FirebaseGoogleLogin(idToken);
+      
+      const accessToken = response?.access_token || response?.access || response?.token;
+      const refreshToken = response?.refresh_token || response?.refresh;
+
+      if (typeof window !== "undefined") {
+        if (accessToken) {
+          localStorage.setItem("access_token", accessToken);
+        }
+        if (refreshToken) {
+          localStorage.setItem("refresh_token", refreshToken);
+        }
+      }
+
+      await refreshProfile();
+      
+      toast.success(response.message || "Login successful!");
+      
+      router.push("/dashboard");
+    } catch (error: unknown) {
+      console.error(error);
+      toast.error(getErrorMessage(error, "Google login failed"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -196,7 +234,7 @@ export default function LoginForm() {
         <div className="h-px flex-1 bg-slate-100"></div>
       </div>
 
-      <button className="w-full flex items-center justify-center gap-3 border border-slate-200 rounded-lg py-3 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-slate-700 font-medium text-sm">
+      <button type="button" onClick={handleGoogleSignIn} disabled={loading} className="w-full flex items-center justify-center gap-3 border border-slate-200 rounded-lg py-3 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 text-slate-700 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
             fill="#EA4335"

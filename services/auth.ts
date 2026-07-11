@@ -180,3 +180,9 @@ export const ResetPassword = async (
 
   return response.data;
 };
+export const FirebaseGoogleLogin = async (idToken: string) => {
+  const response = await api.post("/auth/firebase-google-auth/", {
+    id_token: idToken,
+  });
+  return response.data;
+};
