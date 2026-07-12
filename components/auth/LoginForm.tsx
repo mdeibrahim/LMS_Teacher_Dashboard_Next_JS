@@ -21,7 +21,7 @@ import { toast } from "sonner";
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    email_or_phone: "",
     password: "",
   });
   const { refreshProfile } = useAuth();
@@ -172,11 +172,11 @@ export default function LoginForm() {
         <div className="space-y-4">
           <div className="relative">
             <Input
-              label="Email"
-              name="email"
-              type="email"
-              placeholder="Enter your email"
-              value={formData.email}
+              label="Email or Phone"
+              name="email_or_phone"
+              type="text"
+              placeholder="Enter your email or phone number"
+              value={formData.email_or_phone}
               onChange={handleChange}
               className="pl-10 transition-all text-black placeholder:text-gray-400 h-8 placeholder:text-sm group-focus-within:border-blue-500"
             />

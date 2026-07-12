@@ -18,7 +18,7 @@ export default function VerifyOTPForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const email = searchParams.get("email") ?? "";
+    const contact = searchParams.get("email_or_phone") ?? searchParams.get("email") ?? "";
     const source = searchParams.get("source") ?? "forgot-password";
 
     const [otp, setOtp] = useState("");
@@ -44,7 +44,7 @@ export default function VerifyOTPForm() {
         try {
             setLoading(true);
 
-            const response = await VerifyOTP({ email, otp, type: source as "register" | "forgot-password" });
+            const response = await VerifyOTP({ email_or_phone: contact, otp, type: source as "register" | "forgot-password" });
 
             toast.success(
                 getBackendMessage(response, "OTP verified.")
@@ -56,7 +56,7 @@ export default function VerifyOTPForm() {
             }
             const reset_token = response?.reset_token;
             router.push(
-                `/auth/reset-password?email=${encodeURIComponent(email)}&reset_token=${encodeURIComponent(reset_token)}`
+                `/auth/reset-password?email_or_phone=${encodeURIComponent(contact)}&reset_token=${encodeURIComponent(reset_token)}`
             );
         } catch (error) {
             console.error(error);
@@ -77,7 +77,7 @@ export default function VerifyOTPForm() {
     const handleResend = async () => {
         try {
             const response = await ResendOTP({
-                email,
+                email_or_phone: contact,
                 type: source as "register" | "forgot-password",
             });
 
@@ -106,13 +106,13 @@ export default function VerifyOTPForm() {
                 <p className="text-sm text-slate-600">Verification code sent to</p>
 
                 <p className="mt-1 break-all font-semibold text-blue-700">
-                    {email}
+                    {contact}
                 </p>
 
                 <p className="mt-2 text-xs text-slate-500">
                     {source === "register"
-                        ? "Verify your email to activate your account."
-                        : "Verify your email to reset your password."}
+                        ? "Verify your contact to activate your account."
+                        : "Verify your contact to reset your password."}
                 </p>
             </div>
 

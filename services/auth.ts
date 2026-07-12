@@ -33,28 +33,15 @@ export const getBackendMessage = (
   return candidates[0] || fallback;
 };
 
-const buildAuthFormData = <T extends object>(data: T) => {
-  const formData = new FormData();
-
-  for (const [key, value] of Object.entries(
-    data as Record<string, string>
-  )) {
-    formData.append(key, value);
-  }
-
-  return formData;
-};
-
 /* ===========================
-   Register
+    Register
 =========================== */
 
 export interface RegisterPayload {
-  email: string;
+  email_or_phone: string;
   password: string;
   confirm_password: string;
   full_name: string;
-  phone_number: string;
 }
 
 export const RegisterTeacher = async (
@@ -62,23 +49,18 @@ export const RegisterTeacher = async (
 ) => {
   const response = await api.post(
     "/auth/register/",
-    buildAuthFormData(data),
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    data
   );
 
   return response.data;
 };
 
 /* ===========================
-   Login
+    Login
 =========================== */
 
 export interface LoginPayload {
-  email: string;
+  email_or_phone: string;
   password: string;
 }
 
@@ -87,23 +69,18 @@ export const LoginTeacher = async (
 ) => {
   const response = await api.post(
     "/auth/login/",
-    buildAuthFormData(data),
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    data
   );
 
   return response.data;
 };
 
 /* ===========================
-   Forgot Password
+    Forgot Password
 =========================== */
 
 export interface ForgotPasswordPayload {
-  email: string;
+  email_or_phone: string;
 }
 
 export const ForgotPassword = async (
@@ -118,11 +95,11 @@ export const ForgotPassword = async (
 };
 
 /* ===========================
-   Verify OTP
+    Verify OTP
 =========================== */
 
 export interface VerifyOTPPayload {
-  email: string;
+  email_or_phone: string;
   otp: string;
   type: "register" | "forgot-password";
   reset_token?: string;
@@ -140,11 +117,11 @@ export const VerifyOTP = async (
 };
 
 /* ===========================
-   Resend OTP
+    Resend OTP
 =========================== */
 
 export interface ResendOTPPayload {
-  email: string;
+  email_or_phone: string;
   type: "register" | "forgot-password";
 }
 
@@ -160,11 +137,11 @@ export const ResendOTP = async (
 };
 
 /* ===========================
-   Reset Password
+    Reset Password
 =========================== */
 
 export interface ResetPasswordPayload {
-  email: string;
+  email_or_phone: string;
   reset_token: string;
   password: string;
   confirm_password: string;

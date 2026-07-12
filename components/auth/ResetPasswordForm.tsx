@@ -19,7 +19,7 @@ export default function ResetPasswordForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const email = searchParams.get("email") ?? "";
+    const emailOrPhone = searchParams.get("email_or_phone") ?? searchParams.get("email") ?? "";
     const reset_token = searchParams.get("reset_token") ?? "";
 
     const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +52,7 @@ export default function ResetPasswordForm() {
             setLoading(true);
 
             await ResetPassword({
-                email,
+                email_or_phone: emailOrPhone,
                 reset_token : reset_token,
                 password,
                 confirm_password: confirmPassword,

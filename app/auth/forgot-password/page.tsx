@@ -13,7 +13,7 @@ import {
 export default function ForgotPasswordPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
+  const [emailOrPhone, setEmailOrPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (
@@ -21,15 +21,15 @@ export default function ForgotPasswordPage() {
   ) => {
     e.preventDefault();
 
-    if (!email.trim()) {
-      toast.error("Email is required.");
+    if (!emailOrPhone.trim()) {
+      toast.error("Email or phone number is required.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const response = await ForgotPassword({ email });
+      const response = await ForgotPassword({ email_or_phone: emailOrPhone });
 
       toast.success(
         getBackendMessage(
@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
       );
 
       router.push(
-        `/auth/verify-otp?email=${encodeURIComponent(email)}&source=forgot-password`
+        `/auth/verify-otp?email_or_phone=${encodeURIComponent(emailOrPhone)}&source=forgot-password`
       );
     } catch (error) {
       console.error(error);
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
     >
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-700">
-          Email Address
+          Email or Phone Number
         </label>
 
         <div className="relative">
@@ -72,12 +72,12 @@ export default function ForgotPasswordPage() {
           />
 
           <input
-            type="email"
-            value={email}
+            type="text"
+            value={emailOrPhone}
             onChange={(e) =>
-              setEmail(e.target.value)
+              setEmailOrPhone(e.target.value)
             }
-            placeholder="teacher@example.com"
+            placeholder="teacher@example.com or +880123456789"
             className="w-full rounded-xl border border-slate-300 py-3 pl-11 pr-4 outline-none transition focus:border-blue-600"
           />
         </div>

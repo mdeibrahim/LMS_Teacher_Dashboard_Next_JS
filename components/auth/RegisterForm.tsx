@@ -32,8 +32,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     full_name: "",
-    email: "",
-    phone_number: "",
+    email_or_phone: "",
     password: "",
     confirm_password: "",
   });
@@ -112,7 +111,7 @@ export default function RegisterForm() {
       setTimeout(() => {
         router.replace(
           "/auth/verify-otp?email=" +
-          encodeURIComponent(formData.email) +
+          encodeURIComponent(formData.email_or_phone) +
           "&source=register"
         );
       }, 1000);
@@ -178,31 +177,15 @@ export default function RegisterForm() {
 
         <div className="relative group">
           <Input
-            label="Email Address"
-            name="email"
-            type="email"
-            placeholder="educator@institution.edu"
-            value={formData.email}
+            label="Email or Phone Number"
+            name="email_or_phone"
+            type="text"
+            placeholder="educator@institution.edu or +880123456789"
+            value={formData.email_or_phone}
             onChange={handleChange}
             className="pr-11 transition-all text-black placeholder:text-gray-400 h-8 placeholder:text-sm group-focus-within:border-blue-500"
           />
           <Mail
-            size={18}
-            className="absolute right-4 top-7.5 text-gray-400 transition-colors group-focus-within:text-blue-500 pointer-events-none"
-          />
-        </div>
-
-        <div className="relative group">
-          <Input
-            label="Phone Number"
-            name="phone_number"
-            type="tel"
-            placeholder="+880 123456789"
-            value={formData.phone_number}
-            onChange={handleChange}
-            className="pr-11 transition-all text-black placeholder:text-gray-400 h-8 placeholder:text-sm group-focus-within:border-blue-500"
-          />
-          <Phone
             size={18}
             className="absolute right-4 top-7.5 text-gray-400 transition-colors group-focus-within:text-blue-500 pointer-events-none"
           />
