@@ -11,6 +11,7 @@ export interface Profile {
   teacher_institution: string | null;
   teacher_subject: string | null;
   teacher_experience_years: number | null;
+  is_admin: boolean;
   created_at: string;
 }
 

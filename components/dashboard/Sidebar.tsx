@@ -17,6 +17,16 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Users,
+  Shield,
+  GraduationCap,
+  UserCheck,
+  Smartphone,
+  Key,
+  CreditCard,
+  ClipboardList,
+  Award,
+  FileText,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,9 +44,16 @@ export default function Sidebar({
     pathname.startsWith("/manage-content") ||
     pathname.startsWith("/dashboard")
   );
+  const [adminOpen, setAdminOpen] = useState(
+    pathname.startsWith("/admin")
+  );
   
   const isActive = (href: string) => {
     return pathname === href;
+  };
+
+  const isActiveStartsWith = (prefix: string) => {
+    return pathname.startsWith(prefix);
   };
 
 
@@ -44,6 +61,7 @@ export default function Sidebar({
   useAuth();
   const avatarSrc = profile?.profile_picture || "/default_pp.jpg";
   const isRemoteAvatar = avatarSrc.startsWith("http://") || avatarSrc.startsWith("https://");
+  const isAdmin = profile?.is_admin === true;
 
   const handleLogout = () => {
   closeSidebar?.(); // Mobile sidebar থাকলে বন্ধ করবে
@@ -194,6 +212,164 @@ export default function Sidebar({
             </div>
           )}
         </div>
+
+        {isAdmin && (
+          <div className="mt-4">
+            <button
+              onClick={() => setAdminOpen(!adminOpen)}
+              className="w-full flex items-center justify-between px-5 py-0 text-slate-700 hover:bg-slate-50 rounded-xl"
+            >
+              <div className="flex items-center gap-3">
+                <Shield size={18} />
+                <span className="font-medium">
+                  Administrator
+                </span>
+              </div>
+
+              {adminOpen ? (
+                <ChevronDown size={18} />
+              ) : (
+                <ChevronRight size={18} />
+              )}
+            </button>
+
+            {adminOpen && (
+              <div className="ml-6 mt-3 space-y-1">
+                <div className="px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  People
+                </div>
+
+                <Link
+                  href="/admin/users"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/users")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <Users size={14} />
+                  Users
+                </Link>
+
+                <Link
+                  href="/admin/admins"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/admins")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <Shield size={14} />
+                  Admins
+                </Link>
+
+                <Link
+                  href="/admin/teachers"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/teachers")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <GraduationCap size={14} />
+                  Teachers
+                </Link>
+
+                <Link
+                  href="/admin/students"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/students")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <UserCheck size={14} />
+                  Students
+                </Link>
+
+                <Link
+                  href="/admin/device-sessions"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/device-sessions")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <Smartphone size={14} />
+                  Device Sessions
+                </Link>
+
+                <Link
+                  href="/admin/otps"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/otps")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <Key size={14} />
+                  OTPs
+                </Link>
+
+                <div className="px-3 py-1 mt-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Commerce
+                </div>
+
+                <Link
+                  href="/admin/payment-submissions"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/payment-submissions")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <CreditCard size={14} />
+                  Payment Submissions
+                </Link>
+
+                <Link
+                  href="/admin/enrollments"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/enrollments")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <ClipboardList size={14} />
+                  Enrollments
+                </Link>
+
+                <Link
+                  href="/admin/certificates"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/certificates")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <Award size={14} />
+                  Certificates
+                </Link>
+
+                <div className="px-3 py-1 mt-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Operations
+                </div>
+
+                <Link
+                  href="/admin/payment-instructions"
+                  onClick={closeSidebar}
+                  className={`flex items-center text-sm gap-2 px-3 py-1 rounded-xl font-medium ${isActive("/admin/payment-instructions")
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-slate-600 hover:bg-slate-50"
+                    }`}
+                >
+                  <FileText size={14} />
+                  Payment Instructions
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Settings */}
         <Link
