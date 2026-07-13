@@ -32,7 +32,6 @@ import EditorToolbar from "./EditorToolbar";
 import LessonContent, { lessonContentMarksStyles } from "./LessonContent";
 import SaveStatus from "./SaveStatus";
 import MediaModal from "./media/MediaModal";
-import MediaList from "./media/MediaList";
 import type {
   MediaDraft,
   MediaItem,
@@ -1177,8 +1176,8 @@ export default function LessonEditor({
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="space-y-6">
+        <div className="space-y-6">
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -1325,15 +1324,6 @@ export default function LessonEditor({
               </button>
             </div>
           </form>
-        </div>
-
-        <div className="lg:col-span-1">
-          <MediaList
-            mediaItems={mediaItems}
-            onAddMedia={openMediaModal}
-            onEditMedia={startEditingMedia}
-            onDeleteMedia={deleteMediaItem}
-          />
         </div>
       </div>
 
