@@ -43,6 +43,7 @@ import {
   extractLessonSaveArtifacts,
   findMediaItemByLinkedId,
   getLinkedResourceIdFromTarget,
+  parsePositiveId,
   repairLegacyLinkedMediaHtml,
 } from "@/lib/lesson-media-link";
 
@@ -815,7 +816,48 @@ export default function LessonEditor({
     setMediaModalOpen(true);
   };
 
+  const unlinkMediaFromContent = (mediaItem: MediaItem) => {
+    if (!contentRef.current) {
+      return;
+    }
+
+    const idsToRemove = new Set<number>();
+    const parsedResourceId = parsePositiveId(mediaItem.resourceId);
+    const parsedId = parsePositiveId(mediaItem.id);
+
+    if (parsedResourceId) idsToRemove.add(parsedResourceId);
+    if (parsedId) idsToRemove.add(parsedId);
+
+    if (idsToRemove.size === 0) {
+      return;
+    }
+
+    const spans = contentRef.current.querySelectorAll(
+      'span[data-content-id], span[data-media-id]'
+    );
+
+    spans.forEach((span) => {
+      const dataset = (span as HTMLElement).dataset;
+      const contentId = parsePositiveId(dataset.contentId);
+      const mediaId = parsePositiveId(dataset.mediaId);
+
+      if (
+        (contentId && idsToRemove.has(contentId)) ||
+        (mediaId && idsToRemove.has(mediaId))
+      ) {
+        const text = span.textContent;
+        const textNode = document.createTextNode(text ?? "");
+        span.parentNode?.replaceChild(textNode, span);
+      }
+    });
+  };
+
   const deleteMediaItem = (mediaId: number) => {
+    const item = mediaItems.find((entry) => entry.id === mediaId) ?? null;
+    if (item) {
+      unlinkMediaFromContent(item);
+    }
+
     setMediaItems((current) =>
       current.filter((item) => item.id !== mediaId)
     );
