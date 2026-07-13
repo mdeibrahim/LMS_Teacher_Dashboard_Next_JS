@@ -53,6 +53,15 @@ export default function MediaModal({
   const [youtubeUrl, setYoutubeUrl] = useState(
     item?.youtubeUrl ?? ""
   );
+  const [imageUrl, setImageUrl] = useState(
+    item?.imageUrl ?? ""
+  );
+  const [audioUrl, setAudioUrl] = useState(
+    item?.audioUrl ?? ""
+  );
+  const [videoUrl, setVideoUrl] = useState(
+    item?.videoUrl ?? ""
+  );
   const [fileName, setFileName] = useState(item?.fileName ?? "");
   const [file, setFile] = useState<File | null>(null);
 
@@ -155,32 +164,153 @@ export default function MediaModal({
             </div>
           )}
 
-          {contentType !== "text" && contentType !== "youtube" && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Upload File
-              </label>
-              <input
-                type="file"
-                accept={
-                  contentType === "image"
-                    ? "image/*"
-                    : contentType === "audio"
-                      ? "audio/*"
-                      : "video/*"
-                }
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  setFile(file ?? null);
-                  setFileName(file?.name ?? "");
-                }}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
-              />
-              {fileName ? (
-                <p className="mt-2 text-xs text-slate-500">
-                  Selected file: {fileName}
-                </p>
-              ) : null}
+          {contentType === "image" && (
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Image URL
+                </label>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-slate-500">Or upload file</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Upload File
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    setFile(file ?? null);
+                    setFileName(file?.name ?? "");
+                    if (file) {
+                      setImageUrl("");
+                    }
+                  }}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                />
+                {fileName ? (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Selected file: {fileName}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          )}
+
+          {contentType === "audio" && (
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Audio URL
+                </label>
+                <input
+                  type="url"
+                  value={audioUrl}
+                  onChange={(event) => setAudioUrl(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/audio.mp3"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-slate-500">Or upload file</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Upload File
+                </label>
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    setFile(file ?? null);
+                    setFileName(file?.name ?? "");
+                    if (file) {
+                      setAudioUrl("");
+                    }
+                  }}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                />
+                {fileName ? (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Selected file: {fileName}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          )}
+
+          {contentType === "video" && (
+            <div className="space-y-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Video URL
+                </label>
+                <input
+                  type="url"
+                  value={videoUrl}
+                  onChange={(event) => setVideoUrl(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/video.mp4"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-slate-500">Or upload file</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-700">
+                  Upload File
+                </label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    setFile(file ?? null);
+                    setFileName(file?.name ?? "");
+                    if (file) {
+                      setVideoUrl("");
+                    }
+                  }}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                />
+                {fileName ? (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Selected file: {fileName}
+                  </p>
+                ) : null}
+              </div>
             </div>
           )}
 
@@ -211,6 +341,9 @@ export default function MediaModal({
                   contentType,
                   textContent,
                   youtubeUrl,
+                  imageUrl,
+                  audioUrl,
+                  videoUrl,
                   fileName,
                   file,
                 })

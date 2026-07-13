@@ -740,8 +740,13 @@ export default function LessonEditor({
       : null;
     const nextFile = draft.file ?? existingFile;
 
-    if (requiresFile && !nextFile) {
-      toast.error("Please select a file for this media item");
+    const hasUrl =
+      (draft.contentType === "image" && draft.imageUrl.trim()) ||
+      (draft.contentType === "audio" && draft.audioUrl.trim()) ||
+      (draft.contentType === "video" && draft.videoUrl.trim());
+
+    if (requiresFile && !nextFile && !hasUrl) {
+      toast.error("Please select a file or provide a URL for this media item");
       return;
     }
 
@@ -755,6 +760,9 @@ export default function LessonEditor({
       contentType: draft.contentType,
       textContent: draft.textContent,
       youtubeUrl: draft.youtubeUrl,
+      imageUrl: draft.imageUrl,
+      audioUrl: draft.audioUrl,
+      videoUrl: draft.videoUrl,
       fileName: draft.fileName || nextFile?.name || "",
     };
 
@@ -789,7 +797,7 @@ export default function LessonEditor({
       return [...current, nextMediaItem];
     });
 
-    if (requiresFile && nextFile) {
+    if (nextFile) {
       mediaFilesRef.current.set(nextMediaItem.id, nextFile);
     } else {
       mediaFilesRef.current.delete(nextMediaItem.id);
@@ -929,7 +937,13 @@ export default function LessonEditor({
           external_url:
             item.contentType === "youtube"
               ? item.youtubeUrl
-              : undefined,
+              : item.contentType === "image" && item.imageUrl
+                ? item.imageUrl
+                : item.contentType === "audio" && item.audioUrl
+                  ? item.audioUrl
+                  : item.contentType === "video" && item.videoUrl
+                    ? item.videoUrl
+                    : undefined,
           embed_url:
             item.contentType === "youtube"
               ? item.youtubeUrl

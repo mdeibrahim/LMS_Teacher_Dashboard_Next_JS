@@ -12,6 +12,9 @@ export interface MediaItem {
   contentType: MediaContentType;
   textContent: string;
   youtubeUrl: string;
+  imageUrl: string;
+  audioUrl: string;
+  videoUrl: string;
   fileName: string;
 }
 
@@ -20,6 +23,9 @@ export interface MediaDraft {
   contentType: MediaContentType;
   textContent: string;
   youtubeUrl: string;
+  imageUrl: string;
+  audioUrl: string;
+  videoUrl: string;
   fileName: string;
   file: File | null;
 }
