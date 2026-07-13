@@ -157,11 +157,9 @@ export default function LoginForm() {
       )}
     <div className="w-full max-w-md space-y-8 rounded-2xl border bg-white p-8 shadow-sm">
       <div className="flex flex-col items-center">
-        <BookOpen className="mt-2 mb-2 text-blue-600" size={28} />
-
-        <h2 className="mt-4 text-center text-3xl font-bold text-gray-900">
+        <h4 className="mt-4 text-center text-2xl font-bold text-gray-900">
           Welcome Back
-        </h2>
+        </h4>
 
         <p className="mt-2 text-center text-sm text-gray-600">
           Sign in to your account

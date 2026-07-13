@@ -1144,11 +1144,12 @@ export default function LessonEditor({
             }}
             className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_180px]">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] items-end">
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-700">
                   Lesson Title
                 </label>
+
                 <input
                   type="text"
                   value={title}
@@ -1157,49 +1158,40 @@ export default function LessonEditor({
                     markDirty();
                   }}
                   placeholder="Enter lesson title"
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Order
+              <div className="flex md:justify-end">
+                <label className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-blue-300 hover:bg-blue-50 md:w-auto">
+                  <input
+                    type="checkbox"
+                    checked={isPublished}
+                    onChange={(event) => {
+                      setIsPublished(event.target.checked);
+                      markDirty();
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  />
+
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">
+                      Publish Lesson
+                    </p>
+                    
+                  </div>
                 </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={order}
-                  onChange={(event) => {
-                    setOrder(Number(event.target.value));
-                    markDirty();
-                  }}
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
               </div>
             </div>
 
-            <label className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={isPublished}
-                onChange={(event) => {
-                  setIsPublished(event.target.checked);
-                  markDirty();
-                }}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              Publish lesson immediately
-            </label>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Lesson Content
-                  </label>
-                  <p className="mt-1 text-xs text-slate-500">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Lesson Content
+                </label>
+                <p className="mt-1 text-xs text-slate-500">
                     Highlight text, apply formatting, link selected words to
                     media items, and store sidebar resources in the lesson body.
                   </p>

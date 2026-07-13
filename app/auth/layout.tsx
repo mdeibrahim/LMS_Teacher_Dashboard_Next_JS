@@ -22,7 +22,7 @@ export default function AuthLayout({
 
           <div className="mb-8 text-center">
 
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 shadow-lg">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 shadow-lg">
 
               <GraduationCap
                 className="text-white"

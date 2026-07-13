@@ -29,12 +29,12 @@ const types: {
   label: string;
   icon: ReactNode;
 }[] = [
-  { value: "text", label: "Text", icon: <FileText size={14} /> },
-  { value: "image", label: "Image", icon: <ImageIcon size={14} /> },
-  { value: "audio", label: "Audio", icon: <AudioLines size={14} /> },
-  { value: "video", label: "Video", icon: <Video size={14} /> },
-  { value: "youtube", label: "YouTube", icon: <Play size={14} /> },
-];
+    { value: "text", label: "Text", icon: <FileText size={14} /> },
+    { value: "image", label: "Image", icon: <ImageIcon size={14} /> },
+    { value: "audio", label: "Audio", icon: <AudioLines size={14} /> },
+    { value: "video", label: "Video", icon: <Video size={14} /> },
+    { value: "youtube", label: "YouTube", icon: <Play size={14} /> },
+  ];
 
 export default function MediaModal({
   open,
@@ -109,11 +109,10 @@ export default function MediaModal({
                   key={type.value}
                   type="button"
                   onClick={() => setContentType(type.value)}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition ${
-                    contentType === type.value
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition ${contentType === type.value
                       ? "border-blue-200 bg-blue-50 text-blue-700"
                       : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                  }`}
+                    }`}
                 >
                   {type.icon}
                   {type.label}

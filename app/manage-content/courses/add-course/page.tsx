@@ -179,7 +179,7 @@ export default function AddCoursePage() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Course Name
+            Subject Name
           </label>
 
           <input
@@ -187,7 +187,7 @@ export default function AddCoursePage() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Enter course name"
+            placeholder="Enter Subject name"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
@@ -232,7 +232,7 @@ export default function AddCoursePage() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Course Cover
+            Subject Cover
           </label>
 
           <input
@@ -248,14 +248,14 @@ export default function AddCoursePage() {
 
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-700">
-            Course Description
+            Subject Description
           </label>
 
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Enter course description"
+            placeholder="Enter Subject description"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={4}
             required
@@ -276,7 +276,7 @@ export default function AddCoursePage() {
             disabled={submitting}
             className="rounded-xl bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {submitting ? "Saving..." : "Save Course"}
+            {submitting ? "Saving..." : "Save Subject"}
           </button>
         </div>
       </form>

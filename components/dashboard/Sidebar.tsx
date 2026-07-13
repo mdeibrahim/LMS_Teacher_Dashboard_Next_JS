@@ -153,7 +153,7 @@ export default function Sidebar({
                   }`}
               >
                 <BookOpen size={14} />
-                Courses
+                Subjects
               </Link>
 
               <Link

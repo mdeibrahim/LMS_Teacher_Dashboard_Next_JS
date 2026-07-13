@@ -219,7 +219,7 @@ function AddModuleContent() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <div>
+          {/* <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
               Order
             </label>
@@ -232,7 +232,7 @@ function AddModuleContent() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-          </div>
+          </div> */}
 
           <div className="flex items-end">
             <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
