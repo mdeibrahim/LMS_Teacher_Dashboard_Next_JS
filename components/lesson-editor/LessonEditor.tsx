@@ -1304,6 +1304,15 @@ export default function LessonEditor({
           setEditingMediaItem(null);
         }}
         onSave={handleMediaSave}
+        onRemove={
+          editingMediaItem
+            ? () => {
+                deleteMediaItem(editingMediaItem.id);
+                setMediaModalOpen(false);
+                setEditingMediaItem(null);
+              }
+            : undefined
+        }
       />
     </div>
   );

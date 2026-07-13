@@ -22,6 +22,7 @@ interface MediaModalProps {
   item: MediaItem | null;
   onClose: () => void;
   onSave: (draft: MediaDraft) => void;
+  onRemove?: () => void;
 }
 
 const types: {
@@ -41,6 +42,7 @@ export default function MediaModal({
   item,
   onClose,
   onSave,
+  onRemove,
 }: MediaModalProps) {
   const [title, setTitle] = useState(item?.title ?? "");
   const [contentType, setContentType] =
@@ -183,6 +185,16 @@ export default function MediaModal({
           )}
 
           <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
+            {item && onRemove ? (
+              <button
+                type="button"
+                onClick={onRemove}
+                className="rounded-xl border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              >
+                Remove Media
+              </button>
+            ) : null}
+
             <button
               type="button"
               onClick={onClose}
